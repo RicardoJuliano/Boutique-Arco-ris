@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* Botões */
+  .btn-gold {
+    @apply border border-gold text-gold font-body font-light tracking-widest uppercase text-sm px-8 py-3 hover:bg-gold hover:text-bg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-gold-hero {
+    @apply block sm:inline-block text-center border border-gold text-gold font-body font-light tracking-widest uppercase text-sm px-10 py-3.5 hover:bg-gold hover:text-bg transition-all duration-300;
+  }
+  .btn-gold-submit {
+    @apply border border-gold text-gold font-body font-light tracking-widest uppercase text-sm py-3.5 mt-2 hover:bg-gold hover:text-bg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-outline {
+    @apply border border-border text-cream font-body font-light tracking-widest uppercase text-sm px-8 py-3 text-center hover:border-gold transition-all duration-300;
+  }
+  .btn-outline-hero {
+    @apply block sm:inline-block text-center border border-border text-cream font-body font-light tracking-widest uppercase text-sm px-10 py-3.5 hover:border-gold transition-all duration-300;
+  }
+  .btn-nav {
+    @apply border border-gold text-gold px-4 py-1.5 hover:bg-gold hover:text-bg transition-all duration-200;
+  }
+
+  /* Formulários */
+  .field-label {
+    @apply block font-body text-xs font-light tracking-widest uppercase text-muted mb-2;
+  }
+  .field-input {
+    @apply w-full bg-surface border border-border text-cream font-body font-light px-4 py-3 outline-none focus:border-gold transition-colors placeholder:text-muted/50;
+  }
+
+  /* Tipografia */
+  .page-title {
+    @apply font-display text-4xl font-light text-cream;
+  }
+  .eyebrow {
+    @apply font-body text-xs font-light tracking-[0.4em] uppercase;
+  }
+  .hero-eyebrow {
+    @apply eyebrow text-gold mb-6;
+  }
+  .page-eyebrow {
+    @apply eyebrow text-gold mb-4;
+  }
+  .section-eyebrow {
+    @apply eyebrow text-muted text-center mb-10 md:mb-16;
+  }
+  .error-msg {
+    @apply font-body text-sm font-light text-red-400/80 text-center mb-6;
+  }
+  .error-msg-page {
+    @apply error-msg py-12;
+  }
+
+  /* Misc */
+  .badge {
+    @apply text-xs font-body font-light text-muted border border-border px-2 py-0.5;
+  }
+  .nav-link {
+    @apply text-cream hover:text-gold transition-colors;
+  }
+  .quiz-option {
+    @apply border font-body font-light text-sm tracking-wide py-4 px-4 text-left transition-all duration-200;
+  }
+}
+
+/* Reset e defaults globais */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #faf8f5;
+  color: #2c2420;
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #f0ebe3;
+}
+::-webkit-scrollbar-thumb {
+  background: #c4789a;
+  border-radius: 2px;
+}
+
+.rainbow-bar {
+  background: linear-gradient(to right, #e8737a, #e8a87c, #e8d07c, #8cd87c, #7cb4e8, #9b7ce8, #e87cb4);
+}
