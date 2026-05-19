@@ -17,6 +17,7 @@ import ResultsPage from './pages/ResultsPage';
 import HistoryPage from './pages/HistoryPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
+import CatalogoPage from './pages/CatalogoPage';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Routes>
           {/* Rotas públicas */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/catalogo" element={<CatalogoPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 

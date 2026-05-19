@@ -66,16 +66,59 @@
   }
 }
 
+/* ================================
+   Boutique Arco Íris — Design System
+   ================================ */
+
+:root {
+  --color-bg-primary:    #F5EDE3;
+  --color-bg-secondary:  #E8DDD4;
+  --color-bg-card:       #FAF7F2;
+  --color-bg-dark:       #1A1A1A;
+  --color-text-primary:  #2E1A0E;
+  --color-text-body:     #5C3A20;
+  --color-text-muted:    #A07858;
+  --color-text-light:    #F5EDE3;
+  --color-accent:        #C5A882;
+  --color-accent-dark:   #8A5C3A;
+  --color-border:        #D9C9B8;
+  --gradient-rainbow: conic-gradient(
+    from 180deg,
+    #E040FB, #FF6B35, #FFD23F,
+    #4CAF50, #2196F3, #9C27B0, #E040FB
+  );
+  --font-display:  'Playfair Display', Georgia, serif;
+  --font-script:   'Dancing Script', cursive;
+  --font-body:     'DM Sans', system-ui, sans-serif;
+  --text-hero:    3rem;
+  --text-h1:      2rem;
+  --text-h2:      1.5rem;
+  --text-h3:      1.125rem;
+  --text-body:    1rem;
+  --text-sm:      0.875rem;
+  --text-label:   0.75rem;
+  --space-xs:   0.5rem;
+  --space-sm:   1rem;
+  --space-md:   1.5rem;
+  --space-lg:   2.5rem;
+  --space-xl:   4rem;
+  --radius-sm:   2px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --border:      0.5px solid var(--color-border);
+  --transition:  all 0.25s ease;
+}
+
 /* Reset e defaults globais */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 body {
-  background-color: #faf8f5;
-  color: #2c2420;
-  font-family: 'Jost', sans-serif;
-  font-weight: 300;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
@@ -85,10 +128,10 @@ body {
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #f0ebe3;
+  background: var(--color-bg-card);
 }
 ::-webkit-scrollbar-thumb {
-  background: #c4789a;
+  background: var(--color-accent);
   border-radius: 2px;
 }
 

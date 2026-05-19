@@ -1,0 +1,21 @@
+{
+  "currentPhase": "idle",
+  "completedFeatures": [
+    "auth (register, login, logout, sessão persistente)",
+    "quiz de moda com 6 perguntas",
+    "consultora IA (Anthropic claude-sonnet-4-6)",
+    "histórico de recomendações",
+    "painel admin — listagem e formulário de produtos",
+    "upload de imagem para Cloudinary",
+    "responsivo com menu hamburger"
+  ],
+  "pendingFeatures": [
+    "vitrine pública de produtos ativos",
+    "fotos dos produtos nas recomendações da IA",
+    "paginação na listagem admin",
+    "deploy (Render/Railway + Vercel/Netlify)"
+  ],
+  "openIssues": [],
+  "lastAgent": null,
+  "lastUpdated": "2026-05-18"
+}

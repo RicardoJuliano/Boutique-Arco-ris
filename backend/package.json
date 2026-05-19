@@ -1,11 +1,14 @@
 {
-  "name": "elite-moda-backend",
+  "name": "boutique-arco-iris-backend",
   "version": "1.0.0",
-  "description": "API REST da loja Élite Moda com consultora de moda por IA",
+  "description": "API REST da Boutique Arco-Íris com consultora de moda por IA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

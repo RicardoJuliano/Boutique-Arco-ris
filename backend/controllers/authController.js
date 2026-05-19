@@ -12,11 +12,13 @@ const userRepository = require('../repositories/userRepository');
 
 // Configuração do cookie JWT — centralizada aqui para garantir consistência
 // entre login e registro (ambos definem o mesmo cookie)
+const isProd = process.env.NODE_ENV === 'production';
 const COOKIE_OPTIONS = {
-  httpOnly: true,    // JS no browser não acessa — elimina XSS como vetor de roubo
-  secure: process.env.NODE_ENV === 'production',  // HTTPS apenas em produção
-  sameSite: 'strict', // Bloqueia envio cross-site (proteção CSRF primária)
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias em milissegundos
+  httpOnly: true,
+  secure: isProd,
+  // cross-origin em produção (Vercel → Render) exige none+secure
+  sameSite: isProd ? 'none' : 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 exports.register = async function register(req, res, next) {
@@ -48,8 +50,8 @@ exports.logout = function logout(req, res) {
   // Limpar o cookie definindo maxAge=0
   res.clearCookie('token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'strict',
   });
   res.json({ message: 'Logout realizado com sucesso' });
 };

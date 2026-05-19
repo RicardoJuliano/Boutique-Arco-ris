@@ -23,6 +23,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G'],
     desc: 'Blazer de alfaiataria com corte impecável e tecido premium.',
     tag: 'Best Seller',
+    image_url: 'https://images.pexels.com/photos/14979454/pexels-photo-14979454.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 2,
@@ -35,6 +36,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G', 'GG'],
     desc: 'Vestido fluido em viscose com caimento elegante.',
     tag: 'Novo',
+    image_url: 'https://images.pexels.com/photos/10504219/pexels-photo-10504219.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 3,
@@ -47,6 +49,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G', 'GG'],
     desc: 'Calça pantalona de alfaiataria, versátil e atemporal.',
     tag: null,
+    image_url: 'https://images.pexels.com/photos/28168172/pexels-photo-28168172.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 4,
@@ -59,6 +62,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G'],
     desc: 'Conjunto em linho natural, elegante e confortável.',
     tag: 'Mais Vendido',
+    image_url: 'https://images.pexels.com/photos/18031037/pexels-photo-18031037.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 5,
@@ -71,6 +75,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G', 'GG'],
     desc: 'Jaqueta jeans com caimento relaxado e costuras reforçadas.',
     tag: null,
+    image_url: 'https://images.pexels.com/photos/9871160/pexels-photo-9871160.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 6,
@@ -83,6 +88,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G', 'GG'],
     desc: 'Camisa em linho respirável, ideal para dias quentes.',
     tag: null,
+    image_url: 'https://images.pexels.com/photos/5149729/pexels-photo-5149729.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 7,
@@ -95,6 +101,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G'],
     desc: 'Vestido slip em cetim — clássico renovado para noites especiais.',
     tag: 'Exclusivo',
+    image_url: 'https://images.pexels.com/photos/36041595/pexels-photo-36041595.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 8,
@@ -107,6 +114,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G', 'GG'],
     desc: 'Moletom cropped com recortes coloridos em contraste.',
     tag: 'Tendência',
+    image_url: 'https://images.pexels.com/photos/19005492/pexels-photo-19005492.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 9,
@@ -119,6 +127,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G', 'GG'],
     desc: 'Saia midi plissada em tecido fluido, tom sage versátil.',
     tag: 'Novo',
+    image_url: 'https://images.pexels.com/photos/13214677/pexels-photo-13214677.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 10,
@@ -131,6 +140,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G'],
     desc: 'Terno de alfaiataria premium em lã mista.',
     tag: 'Premium',
+    image_url: 'https://images.pexels.com/photos/31647491/pexels-photo-31647491.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 11,
@@ -143,6 +153,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G', 'GG'],
     desc: 'Short ciclista em lycra com estampa exclusiva.',
     tag: null,
+    image_url: 'https://images.pexels.com/photos/28665130/pexels-photo-28665130.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
   {
     id: 12,
@@ -155,6 +166,7 @@ const CATALOG = [
     sizes: ['P', 'M', 'G'],
     desc: 'Trench coat atemporal em gabardine de algodão.',
     tag: 'Clássico',
+    image_url: 'https://images.pexels.com/photos/12002802/pexels-photo-12002802.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
 ];
 

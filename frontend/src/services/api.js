@@ -9,7 +9,7 @@
  *   a simplicidade supera os utilitários extras do Axios.
  */
 
-const BASE = '/api';
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
@@ -58,6 +58,10 @@ export const getRecommendations = (answers) =>
 
 export const getHistory = () =>
   request('/recommendations/history');
+
+export const getProducts = () => request('/products');
+
+export const getProduct = (id) => request(`/products/${id}`);
 
 // Admin
 export const adminListProducts = () =>

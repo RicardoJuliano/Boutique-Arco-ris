@@ -27,6 +27,7 @@ export default function Navbar() {
 
         {/* Links — desktop */}
         <div className="hidden md:flex items-center gap-6 font-body text-sm font-light tracking-widest uppercase">
+          <Link to="/catalogo" className="nav-link">Catálogo</Link>
           {isAuthenticated ? (
             <>
               <span className="text-muted">Olá, {user?.name?.split(' ')[0]}</span>
@@ -60,6 +61,7 @@ export default function Navbar() {
       {/* Menu — mobile */}
       {isOpen && (
         <div className="md:hidden border-t border-border bg-surface px-6 py-5 flex flex-col gap-5 font-body text-sm font-light tracking-widest uppercase">
+          <Link to="/catalogo" onClick={close} className="nav-link">Catálogo</Link>
           {isAuthenticated ? (
             <>
               <span className="text-muted">Olá, {user?.name?.split(' ')[0]}</span>

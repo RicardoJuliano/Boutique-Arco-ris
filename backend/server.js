@@ -31,6 +31,7 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const productRoutes = require('./routes/productRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
@@ -58,6 +59,7 @@ app.use(express.json({ limit: '10kb' }));
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/admin', adminRoutes);
 
@@ -76,7 +78,7 @@ app.use((req, res) => {
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {
-  console.log(`[server] Élite Moda API rodando em http://localhost:${PORT}`);
+  console.log(`[server] Boutique Arco-Íris API rodando em http://localhost:${PORT}`);
   console.log(`[server] Ambiente: ${process.env.NODE_ENV || 'development'}`);
 });
 

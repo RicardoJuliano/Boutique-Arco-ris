@@ -8,7 +8,13 @@ import {
 } from '../../services/api';
 import Navbar from '../../components/Navbar';
 
-const CATEGORIES = ['Vestidos', 'Blusas', 'Calças', 'Saias', 'Acessórios', 'Outros'];
+const CATEGORIES = [
+  { value: 'vestido',   label: 'Vestidos & Saias' },
+  { value: 'camiseta',  label: 'Blusas & Tops' },
+  { value: 'calça',     label: 'Calças' },
+  { value: 'conjunto',  label: 'Conjuntos' },
+  { value: 'jaqueta',   label: 'Jaquetas & Casacos' },
+];
 
 const ARRAY_FIELDS = [
   { key: 'style', label: 'Estilos' },
@@ -20,7 +26,7 @@ const ARRAY_FIELDS = [
 const empty = {
   name: '',
   price: '',
-  category: CATEGORIES[0],
+  category: CATEGORIES[0].value,
   style: '',
   colors: '',
   occasions: '',
@@ -211,7 +217,7 @@ export default function ProductFormPage() {
               <label className="field-label">Categoria</label>
               <select name="category" value={form.category} onChange={handleChange} className="field-input">
                 {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
             </div>
