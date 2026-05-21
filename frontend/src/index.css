@@ -88,7 +88,7 @@
     #4CAF50, #2196F3, #9C27B0, #E040FB
   );
   --font-display:  'Playfair Display', Georgia, serif;
-  --font-script:   'Dancing Script', cursive;
+  --font-script:   'Moontime', cursive;
   --font-body:     'DM Sans', system-ui, sans-serif;
   --text-hero:    3rem;
   --text-h1:      2rem;
@@ -107,6 +107,11 @@
   --radius-lg:   12px;
   --border:      0.5px solid var(--color-border);
   --transition:  all 0.25s ease;
+}
+
+/* Força fonte do logo — override explícito para garantir carregamento do Moontime */
+.font-script {
+  font-family: 'Moontime', cursive !important;
 }
 
 /* Reset e defaults globais */
@@ -136,7 +141,43 @@ body {
 }
 
 .rainbow-bar {
+  min-height: 3px;
   background: linear-gradient(to right, #e8737a, #e8a87c, #e8d07c, #8cd87c, #7cb4e8, #9b7ce8, #e87cb4);
+}
+
+.rainbow-border {
+  border-image: linear-gradient(to right, #e8737a, #e8a87c, #e8d07c, #8cd87c, #7cb4e8, #9b7ce8, #e87cb4) 1;
+  border-style: solid;
+}
+
+@keyframes pulse-rainbow {
+  0%, 100% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 0 0 rgba(228, 135, 180, 0);
+  }
+  50% {
+    background-position: 100% 50%;
+    box-shadow: 0 4px 18px rgba(155, 124, 232, 0.35);
+  }
+}
+
+.btn-rainbow {
+  @apply font-body font-light tracking-widest uppercase text-sm px-8 py-3 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+  background: linear-gradient(
+    135deg,
+    #f2a7c3, #c4a7e8, #a7c4f2, #a7e8c4, #f2e5a7
+  );
+  background-size: 300% 300%;
+  color: #2E1A0E;
+  animation: pulse-rainbow 4s ease infinite;
+}
+.btn-rainbow:hover {
+  box-shadow: 0 6px 24px rgba(155, 124, 232, 0.4);
+  transform: translateY(-1px);
+}
+.btn-rainbow:active {
+  transform: scale(0.97);
+  transition-duration: 80ms;
 }
 
 /* ================================

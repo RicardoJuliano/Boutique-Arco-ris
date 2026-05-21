@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { getProducts } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { useStagger } from '../hooks/useStagger';
@@ -233,15 +234,7 @@ export default function CatalogoPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="font-script text-xl text-cream/40">Arco-Íris</span>
-          <p className="font-body text-xs font-light text-muted tracking-wide">
-            © 2024 Boutique Arco-Íris. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

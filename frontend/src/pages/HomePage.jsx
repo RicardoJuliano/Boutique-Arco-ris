@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
 import { getProducts } from '../services/api';
 import { useStagger } from '../hooks/useStagger';
@@ -70,26 +71,26 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/25" />
         <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/80 to-bg/30" />
         <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-40">
-          <p className="hero-line hero-line-1 hero-eyebrow">Consultora de Moda com IA</p>
-          <h1 className="hero-line hero-line-2 font-display text-5xl md:text-7xl font-light text-cream leading-tight mb-6 max-w-xl">
-            Vista-se com
+          <p className="hero-line hero-line-1 hero-eyebrow">Loja Multimarcas — Buenópolis, MG</p>
+          <h1 className="hero-line hero-line-2 font-display text-5xl md:text-7xl font-light text-cream leading-tight mb-4 max-w-xl">
+            A luz mais brilhante
             <br />
-            <em className="font-light italic text-gold">intenção</em>
+            do <em className="font-light italic text-gold">Arco-Íris</em>
+            <br />
+            está dentro de você
           </h1>
           <p className="hero-line hero-line-3 font-body text-base font-light text-muted max-w-md mb-10 leading-relaxed">
-            Responda um breve questionário de estilo e deixe nossa IA selecionar
-            as peças perfeitas para você do nosso catálogo exclusivo.
+            Loja Multimarcas · Enviamos para todo o Brasil e exterior
           </p>
           <div className="hero-line hero-line-4 flex flex-col sm:flex-row gap-4">
+            <Link to="/catalogo" className="btn-rainbow">Compre Agora</Link>
             {isAuthenticated ? (
               <>
                 <Link to="/quiz" className="btn-gold-hero">Iniciar Consultoria</Link>
-                <Link to="/catalogo" className="btn-outline-hero">Ver Catálogo</Link>
               </>
             ) : (
               <>
-                <Link to="/register" className="btn-gold-hero">Criar Conta Grátis</Link>
-                <Link to="/catalogo" className="btn-outline-hero">Ver Catálogo</Link>
+                <Link to="/register" className="btn-outline-hero">Criar Conta Grátis</Link>
               </>
             )}
           </div>
@@ -200,26 +201,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-bg">
-        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center md:items-start gap-1">
-            <span className="font-script text-2xl text-cream/70">Arco-Íris</span>
-            <span className="font-body text-[9px] tracking-[0.35em] uppercase text-muted">Boutique</span>
-          </div>
-          <nav className="flex gap-8 font-body text-xs tracking-widest uppercase text-muted">
-            <Link to="/catalogo" className="hover:text-gold transition-colors">Catálogo</Link>
-            {isAuthenticated ? (
-              <Link to="/quiz" className="hover:text-gold transition-colors">Consultora</Link>
-            ) : (
-              <Link to="/register" className="hover:text-gold transition-colors">Cadastrar</Link>
-            )}
-          </nav>
-          <p className="font-body text-xs font-light text-muted/60 tracking-wide">
-            © 2024 Boutique Arco-Íris. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

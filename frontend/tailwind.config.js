@@ -17,9 +17,10 @@ export default {
         dark:        '#1A1A1A',
       },
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        body:    ['"DM Sans"', 'system-ui', 'sans-serif'],
-        script:  ['"Dancing Script"', 'cursive'],
+        display:   ['"Playfair Display"', 'Georgia', 'serif'],
+        body:      ['"DM Sans"', 'system-ui', 'sans-serif'],
+        script:    ['"Moontime"', 'cursive'],
+        cormorant: ['"Cormorant Garamond"', 'Georgia', 'serif'],
       },
     },
   },

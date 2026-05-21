@@ -44,9 +44,13 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
 
         {/* Logo */}
-        <Link to="/" onClick={close} className="flex flex-col items-start leading-none hover:opacity-75 transition-opacity duration-200">
-          <span className="font-script text-3xl text-cream">Arco-Íris</span>
-          <span className="font-body text-[9px] tracking-[0.35em] uppercase text-muted -mt-1">Boutique</span>
+        <Link to="/" onClick={close} className="flex flex-col items-center leading-none hover:opacity-75 transition-opacity duration-300">
+          <span className="font-script text-[2.8rem] text-cream leading-[1] select-none">
+            Arco-Íris
+          </span>
+          <span className="font-cormorant text-[0.6rem] font-light tracking-[0.55em] uppercase text-muted select-none">
+            Boutique
+          </span>
         </Link>
 
         {/* Links — desktop */}
@@ -120,7 +124,7 @@ export default function Navbar() {
       </div>
 
       {/* Faixa arco-íris */}
-      <div className="rainbow-bar h-0.5 w-full" />
+      <div className="rainbow-bar h-[3px] w-full" />
     </nav>
   );
 }
