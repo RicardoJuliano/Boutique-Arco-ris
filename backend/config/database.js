@@ -81,4 +81,34 @@ if (productCount.count === 0) {
   }
 }
 
+// Tabela de pedidos
+db.exec(`
+  CREATE TABLE IF NOT EXISTS orders (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id         INTEGER NOT NULL,
+    status          TEXT    NOT NULL DEFAULT 'processing',
+    total           REAL    NOT NULL,
+    shipping_fee    REAL    NOT NULL DEFAULT 0,
+    address         TEXT    NOT NULL,
+    shipping_method TEXT    NOT NULL,
+    payment_method  TEXT    NOT NULL,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )
+`);
+
+// Itens do pedido
+db.exec(`
+  CREATE TABLE IF NOT EXISTS order_items (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id   INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    size       TEXT    NOT NULL,
+    quantity   INTEGER NOT NULL,
+    unit_price REAL    NOT NULL,
+    FOREIGN KEY (order_id)   REFERENCES orders(id)   ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
+  )
+`);
+
 module.exports = db;

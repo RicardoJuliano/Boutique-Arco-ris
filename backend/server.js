@@ -32,6 +32,8 @@ const authRoutes = require('./routes/authRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const productRoutes = require('./routes/productRoutes');
+const orderRoutes    = require('./routes/orderRoutes');
+const freightRoutes  = require('./routes/freightRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
@@ -62,6 +64,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/orders',   orderRoutes);
+app.use('/api/freight',  freightRoutes);
 
 // Health check — útil para monitoramento e deploy checks
 app.get('/api/health', (req, res) => {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { getProducts } from '../services/api';
+import { useStagger } from '../hooks/useStagger';
 
 const TESTIMONIALS = [
   {
@@ -38,6 +39,7 @@ function StarRating({ count }) {
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
   const [featured, setFeatured] = useState([]);
+  const gridRef = useStagger([featured]);
 
   useEffect(() => {
     getProducts()
@@ -56,10 +58,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-bg">
       <Navbar />
 
-      {/* Hero */}
+      {/* Hero — Ken Burns no background */}
       <section className="relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat ken-burns"
           style={{
             backgroundImage:
               'url(https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=80)',
@@ -68,31 +70,33 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/25" />
         <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/80 to-bg/30" />
         <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-40">
-          <p className="hero-eyebrow">Consultora de Moda com IA</p>
-          <h1 className="font-display text-5xl md:text-7xl font-light text-cream leading-tight mb-6 max-w-xl">
+          <p className="hero-line hero-line-1 hero-eyebrow">Consultora de Moda com IA</p>
+          <h1 className="hero-line hero-line-2 font-display text-5xl md:text-7xl font-light text-cream leading-tight mb-6 max-w-xl">
             Vista-se com
             <br />
             <em className="font-light italic text-gold">intenção</em>
           </h1>
-          <p className="font-body text-base font-light text-muted max-w-md mb-10 leading-relaxed">
+          <p className="hero-line hero-line-3 font-body text-base font-light text-muted max-w-md mb-10 leading-relaxed">
             Responda um breve questionário de estilo e deixe nossa IA selecionar
             as peças perfeitas para você do nosso catálogo exclusivo.
           </p>
-          {isAuthenticated ? (
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/quiz" className="btn-gold-hero">Iniciar Consultoria</Link>
-              <Link to="/catalogo" className="btn-outline-hero">Ver Catálogo</Link>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/register" className="btn-gold-hero">Criar Conta Grátis</Link>
-              <Link to="/catalogo" className="btn-outline-hero">Ver Catálogo</Link>
-            </div>
-          )}
+          <div className="hero-line hero-line-4 flex flex-col sm:flex-row gap-4">
+            {isAuthenticated ? (
+              <>
+                <Link to="/quiz" className="btn-gold-hero">Iniciar Consultoria</Link>
+                <Link to="/catalogo" className="btn-outline-hero">Ver Catálogo</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/register" className="btn-gold-hero">Criar Conta Grátis</Link>
+                <Link to="/catalogo" className="btn-outline-hero">Ver Catálogo</Link>
+              </>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Em Destaque */}
+      {/* Em Destaque — stagger IntersectionObserver */}
       {featured.length > 0 && (
         <section className="border-t border-border">
           <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
@@ -105,7 +109,7 @@ export default function HomePage() {
                 Ver todos →
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {featured.map((product) => (
                 <FeaturedCard key={product.id} product={product} />
               ))}
@@ -222,18 +226,23 @@ export default function HomePage() {
 
 function FeaturedCard({ product }) {
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <div className="group cursor-default">
+    <Link to={`/produto/${product.id}`} className="group stagger-item block">
       <div className="relative aspect-[3/4] bg-surface2 overflow-hidden mb-3">
         {product.image_url && !imgError ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            loading="lazy"
-            onError={() => setImgError(true)}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <>
+            {!imgLoaded && <div className="absolute inset-0 skeleton" />}
+            <img
+              src={product.image_url}
+              alt={product.name}
+              loading="lazy"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgError(true)}
+              className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 img-reveal ${imgLoaded ? 'loaded' : ''}`}
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <span className="font-display text-4xl font-light text-gold/20">{product.name.charAt(0)}</span>
@@ -244,11 +253,26 @@ function FeaturedCard({ product }) {
             {product.tag}
           </span>
         )}
+        {/* Overlay H&M: desliza do rodapé no hover */}
+        <div className="card-overlay absolute inset-x-0 bottom-0 bg-cream/90 backdrop-blur-sm px-4 py-3">
+          <p className="font-body text-xs font-light text-surface leading-relaxed line-clamp-2">
+            {product.desc}
+          </p>
+          {product.sizes?.length > 0 && (
+            <div className="flex gap-1.5 flex-wrap mt-2">
+              {product.sizes.slice(0, 4).map((s) => (
+                <span key={s} className="text-[10px] font-body font-light text-surface/70 border border-surface/30 px-1.5 py-0.5">
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-      <p className="font-display text-base font-light text-cream leading-snug">{product.name}</p>
+      <p className="font-display text-base font-light text-cream leading-snug group-hover:text-gold transition-colors duration-200">{product.name}</p>
       <p className="font-body text-sm font-light text-gold mt-0.5">
         R$ {product.price.toFixed(2).replace('.', ',')}
       </p>
-    </div>
+    </Link>
   );
 }

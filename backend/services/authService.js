@@ -14,11 +14,12 @@ exports.register = async function register({ name, email, password }) {
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  const isAdmin = process.env.ADMIN_EMAIL === email ? 1 : 0;
-  const user = userRepository.create({ name, email, passwordHash, isAdmin });
+  // Novos usuários SEMPRE começam sem privilégios admin (isAdmin = 0).
+  // Promoção a admin deve ser feita diretamente no banco por um admin existente.
+  const user = userRepository.create({ name, email, passwordHash, isAdmin: 0 });
   const token = generateToken(user);
 
-  return { user: { ...user, isAdmin: isAdmin === 1 }, token };
+  return { user: { ...user, isAdmin: false }, token };
 };
 
 exports.login = async function login({ email, password }) {

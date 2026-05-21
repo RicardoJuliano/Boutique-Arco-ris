@@ -95,3 +95,15 @@ export const adminUploadImage = (file, productId) => {
     return res.json();
   });
 };
+
+// Freight — calcula frete via ViaCEP + tabela Correios 2025
+export const getFreight = (cep, items = 1) =>
+  request(`/freight?cep=${String(cep).replace(/\D/g, '')}&items=${items}`);
+
+// Orders
+export const createOrder = (data) =>
+  request('/orders', { method: 'POST', body: JSON.stringify(data) });
+
+export const getOrders = () => request('/orders');
+
+export const getOrder = (id) => request(`/orders/${id}`);

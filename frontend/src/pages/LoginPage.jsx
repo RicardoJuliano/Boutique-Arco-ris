@@ -14,7 +14,10 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/quiz';
+  // Whitelist explícita de rotas internas — impede redirect para caminhos arbitrários
+  const rawFrom = location.state?.from?.pathname;
+  const ALLOWED_PREFIXES = ['/quiz', '/catalogo', '/produto/', '/carrinho', '/checkout', '/history', '/pedido/'];
+  const from = rawFrom && (rawFrom === '/' || ALLOWED_PREFIXES.some(p => rawFrom.startsWith(p))) ? rawFrom : '/quiz';
 
   async function handleSubmit(e) {
     e.preventDefault();
