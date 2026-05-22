@@ -110,7 +110,6 @@ export default function ProdutoPage() {
       <>
         <Navbar />
         <div className="min-h-screen bg-bg">
-          {/* Skeleton da página de detalhe */}
           <div className="max-w-6xl mx-auto px-6 py-10 md:py-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
               <div className="aspect-[3/4] skeleton" />
@@ -172,11 +171,9 @@ export default function ProdutoPage() {
         </nav>
       </div>
 
-      {/* Hero — imagem + informações */}
       <section className="max-w-6xl mx-auto px-6 py-8 md:py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
 
-          {/* Coluna esquerda — imagem */}
           <div className="md:sticky md:top-24">
             <div className="relative aspect-[3/4] bg-surface2 overflow-hidden">
               {product.image_url && !imgError ? (
@@ -203,9 +200,7 @@ export default function ProdutoPage() {
             </div>
           </div>
 
-          {/* Coluna direita — informações */}
           <div className="space-y-6">
-            {/* Categoria + nome */}
             <div>
               <p className="font-body text-xs font-light tracking-widest uppercase text-gold mb-2">
                 {CATEGORY_LABELS[product.category] || product.category}
@@ -218,12 +213,10 @@ export default function ProdutoPage() {
               </p>
             </div>
 
-            {/* Descrição */}
             <p className="font-body text-sm font-light text-muted leading-relaxed border-t border-border pt-5">
               {product.desc}
             </p>
 
-            {/* Atributos — cores, estilos, ocasiões */}
             <div className="space-y-3 border-t border-border pt-5">
               {product.colors?.length > 0 && (
                 <div>
@@ -257,7 +250,6 @@ export default function ProdutoPage() {
               )}
             </div>
 
-            {/* Seletor de tamanho */}
             <div className="border-t border-border pt-5">
               <div className="flex items-center justify-between mb-3">
                 <p className="font-body text-xs font-light tracking-widest uppercase text-muted">
@@ -286,7 +278,6 @@ export default function ProdutoPage() {
               </div>
             </div>
 
-            {/* Botões de ação */}
             <div className="space-y-3 border-t border-border pt-5">
               <button
                 onClick={handleAdd}
@@ -311,7 +302,6 @@ export default function ProdutoPage() {
               </Link>
             </div>
 
-            {/* Estoque */}
             {product.stock <= 5 && product.stock > 0 && (
               <p className="font-body text-xs font-light text-gold/80 tracking-wide border border-gold/20 bg-gold/5 px-4 py-2.5">
                 Apenas {product.stock} {product.stock === 1 ? 'unidade' : 'unidades'} em estoque
@@ -321,14 +311,12 @@ export default function ProdutoPage() {
         </div>
       </section>
 
-      {/* Complete o Look */}
       <ProductSection
         eyebrow="Monte seu visual"
         title="Complete o Look"
         products={complements}
       />
 
-      {/* Vistos Recentemente */}
       <ProductSection
         eyebrow="Sua navegação"
         title="Vistos Recentemente"

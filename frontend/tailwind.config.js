@@ -1,10 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  // Informar ao Tailwind quais arquivos escanear para gerar apenas as classes utilizadas
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
-      // Paleta de cores da identidade visual Élite Moda
       colors: {
         bg:          '#E8DDD4',
         surface:     '#FAF7F2',

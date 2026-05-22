@@ -33,10 +33,8 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6 py-10">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
 
-          {/* Logo com círculo diagonal — inspirado na identidade visual da boutique */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-sm">
-              {/* Split diagonal em dois tons nude — referência da identidade visual */}
               <div className="absolute inset-0" style={{
                 background: 'linear-gradient(138deg, #EDE3D9 50%, #D4C4B5 50%)'
               }} />
@@ -56,7 +54,6 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Contato */}
           <div className="flex flex-col gap-3">
             <p className="font-body text-[10px] font-light tracking-widest uppercase text-muted">
               Contato
@@ -87,7 +84,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Formas de pagamento */}
           <div className="flex flex-col gap-3">
             <p className="font-body text-[10px] font-light tracking-widest uppercase text-muted">
               Pagamento
@@ -109,7 +105,6 @@ export default function Footer() {
 
         </div>
 
-        {/* Copyright */}
         <div className="border-t border-border mt-8 pt-6 text-center">
           <p className="font-body text-xs font-light text-muted/60 tracking-wide">
             © {new Date().getFullYear()} Boutique Arco-Íris. Todos os direitos reservados.

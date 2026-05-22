@@ -72,7 +72,6 @@ function ProductItem({ product }) {
             {product.tag}
           </span>
         )}
-        {/* Overlay H&M */}
         <div className="card-overlay absolute inset-x-0 bottom-0 bg-cream/90 backdrop-blur-sm px-4 py-3">
           <p className="font-body text-xs font-light text-surface leading-relaxed line-clamp-2">
             {product.desc}
@@ -103,7 +102,6 @@ function ProductItem({ product }) {
           ))}
         </div>
 
-        {/* Selector de tamanho + botão adicionar */}
         <div className="mt-4 space-y-2">
           {product.sizes?.length > 1 && (
             <div className="flex gap-1.5 flex-wrap">

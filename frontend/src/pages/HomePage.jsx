@@ -97,7 +97,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Em Destaque — stagger IntersectionObserver */}
       {featured.length > 0 && (
         <section className="border-t border-border">
           <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
@@ -235,7 +234,6 @@ function FeaturedCard({ product }) {
             {product.tag}
           </span>
         )}
-        {/* Overlay H&M: desliza do rodapé no hover */}
         <div className="card-overlay absolute inset-x-0 bottom-0 bg-cream/90 backdrop-blur-sm px-4 py-3">
           <p className="font-body text-xs font-light text-surface leading-relaxed line-clamp-2">
             {product.desc}

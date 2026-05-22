@@ -2,6 +2,8 @@ const { z } = require('zod');
 const productRepository = require('../repositories/productRepository');
 const cloudinary = require('../config/cloudinary');
 
+const parseField = (v) => { try { return typeof v === 'string' ? JSON.parse(v) : v; } catch { return v; } };
+
 const VALID_CATEGORIES = ['vestido', 'camiseta', 'calça', 'conjunto', 'jaqueta'];
 const VALID_SIZES = ['PP', 'P', 'M', 'G', 'GG', 'XG', '34', '36', '38', '40', '42', '44', '46', 'U'];
 
@@ -41,7 +43,6 @@ exports.getProduct = function getProduct(req, res, next) {
 
 exports.createProduct = function createProduct(req, res, next) {
   try {
-    const parseField = (v) => { try { return typeof v === 'string' ? JSON.parse(v) : v; } catch { return v; } };
     const body = {
       ...req.body,
       price:     Number(req.body.price),
@@ -67,7 +68,6 @@ exports.createProduct = function createProduct(req, res, next) {
 exports.updateProduct = function updateProduct(req, res, next) {
   try {
     const id = Number(req.params.id);
-    const parseField = (v) => { try { return typeof v === 'string' ? JSON.parse(v) : v; } catch { return v; } };
     const body = { ...req.body };
     if (body.price     !== undefined) body.price = Number(body.price);
     if (body.stock     !== undefined) body.stock = Number(body.stock);
@@ -111,7 +111,6 @@ exports.uploadImage = async function uploadImage(req, res, next) {
       stream.end(req.file.buffer);
     });
 
-    // Se um id de produto foi fornecido, atualizar a imagem diretamente
     if (req.body.productId) {
       productRepository.update(Number(req.body.productId), { imageUrl: result.secure_url });
     }

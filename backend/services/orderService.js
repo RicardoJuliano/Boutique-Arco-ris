@@ -27,14 +27,11 @@ const orderSchema = z.object({
 exports.createOrder = function createOrder(userId, body) {
   const data = orderSchema.parse(body);
 
-  // Toda a operação em transação atômica: verificar estoque, decrementar e criar pedido
-  // sem possibilidade de race condition entre duas requisições simultâneas
-  const result = db.transaction(() => {
+  return db.transaction(() => {
     let subtotal = 0;
     const enriched = [];
 
     for (const item of data.items) {
-      // Busca produto E verifica estoque em lock implícito da transação
       const product = db.prepare(
         'SELECT id, name, price, stock, active FROM products WHERE id = ?'
       ).get(item.productId);
@@ -81,6 +78,4 @@ exports.createOrder = function createOrder(userId, body) {
 
     return { orderId, total, shippingFee: data.shippingFee, status: 'processing' };
   })();
-
-  return result;
 };
