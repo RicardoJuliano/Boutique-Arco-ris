@@ -14,7 +14,7 @@ Aplicação web fullstack de portfólio que combina um e-commerce de moda comple
 - **Carrinho de compras** com contexto global — persiste entre páginas sem recarregar
 - **Checkout completo** com endereço de entrega, escolha de método de envio (PAC/SEDEX) e forma de pagamento (cartão/PIX)
 - **Cálculo de frete em tempo real** via endpoint dedicado
-- **Confirmação de pedido** com resumo e número de rastreio
+- **Confirmação de pedido** com resumo e número do pedido
 - **Autenticação completa** — cadastro, login, logout e sessão persistente via cookie HttpOnly
 
 ### Para o administrador
@@ -115,7 +115,7 @@ boutique-arco-iris/
         ├── services/
         │   └── api.js               # fetch centralizado com credentials: 'include'
         ├── utils/
-        │   └── complementMap.js     # Mapeamento de complementos de endereço
+        │   └── complementMap.js     # Mapeia categorias a produtos complementares ("Complete o Look")
         └── pages/
             ├── HomePage.jsx
             ├── CatalogoPage.jsx
@@ -128,9 +128,8 @@ boutique-arco-iris/
             ├── QuizPage.jsx
             ├── ResultsPage.jsx
             ├── HistoryPage.jsx
-            └── admin/
-                ├── AdminProductsPage.jsx
-                └── ProductFormPage.jsx  # Criar/editar produto com upload de imagem
+            ├── AdminProductsPage.jsx
+            └── ProductFormPage.jsx      # Criar/editar produto com upload de imagem
 ```
 
 **Fluxo de uma requisição:**
