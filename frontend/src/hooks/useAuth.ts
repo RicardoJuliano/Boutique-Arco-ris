@@ -1,5 +1,5 @@
 /**
- * hooks/useAuth.js
+ * hooks/useAuth.ts
  * Hook conveniente para acessar o AuthContext em qualquer componente.
  * Lança erro se usado fora do AuthProvider — falha rápido com mensagem clara.
  */
