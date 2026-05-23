@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import type React from 'react';
 import { Link } from 'react-router-dom';
+import type { Product } from '../types';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
@@ -27,7 +29,7 @@ const TESTIMONIALS = [
   },
 ];
 
-function StarRating({ count }) {
+function StarRating({ count }: { count: number }) {
   return (
     <div className="flex gap-0.5 mb-3">
       {Array.from({ length: count }).map((_, i) => (
@@ -39,15 +41,15 @@ function StarRating({ count }) {
 
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
-  const [featured, setFeatured] = useState([]);
+  const [featured, setFeatured] = useState<Product[]>([]);
   const gridRef = useStagger([featured]);
 
   useEffect(() => {
     getProducts()
-      .then((products) => {
+      .then(({ products }) => {
         const priority = [7, 1, 10, 2];
         const sorted = [
-          ...priority.map((id) => products.find((p) => p.id === id)).filter(Boolean),
+          ...priority.map((id) => products.find((p) => p.id === id)).filter((p): p is Product => Boolean(p)),
           ...products.filter((p) => !priority.includes(p.id)),
         ];
         setFeatured(sorted.slice(0, 4));
@@ -109,7 +111,7 @@ export default function HomePage() {
                 Ver todos →
               </Link>
             </div>
-            <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div ref={gridRef as React.RefObject<HTMLDivElement>} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {featured.map((product) => (
                 <FeaturedCard key={product.id} product={product} />
               ))}
@@ -205,7 +207,8 @@ export default function HomePage() {
   );
 }
 
-function FeaturedCard({ product }) {
+interface FeaturedCardProps { product: Product }
+function FeaturedCard({ product }: FeaturedCardProps) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 

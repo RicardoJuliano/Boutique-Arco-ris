@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { adminListProducts, adminDeleteProduct } from '../../services/api';
 import Navbar from '../../components/Navbar';
+import type { Product } from '../../types';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -14,22 +15,22 @@ export default function AdminProductsPage() {
 
   async function load() {
     try {
-      const data = await adminListProducts();
-      setProducts(data.products);
+      const { products } = await adminListProducts();
+      setProducts(products);
     } catch (e) {
-      setError(e.message);
+      setError(e instanceof Error ? e.message : 'Erro');
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleDelete(id, name) {
+  async function handleDelete(id: number, name: string) {
     if (!confirm(`Remover "${name}"?`)) return;
     try {
       await adminDeleteProduct(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (e) {
-      alert(e.message);
+      alert(e instanceof Error ? e.message : 'Erro');
     }
   }
 

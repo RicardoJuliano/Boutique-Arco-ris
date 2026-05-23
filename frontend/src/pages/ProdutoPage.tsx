@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import type React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getProduct, getProducts } from '../services/api';
@@ -7,6 +8,7 @@ import { useCart } from '../context/CartContext';
 import { useStagger } from '../hooks/useStagger';
 import { useRecentlyViewed, getRecentlyViewed } from '../hooks/useRecentlyViewed';
 import { getComplements } from '../utils/complementMap';
+import type { Product } from '../types';
 
 const CATEGORY_LABELS = {
   vestido:  'Vestidos & Saias',
@@ -16,7 +18,7 @@ const CATEGORY_LABELS = {
   jaqueta:  'Jaquetas & Casacos',
 };
 
-function MiniCard({ product }) {
+function MiniCard({ product }: { product: Product }) {
   const [imgError, setImgError]   = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
@@ -55,7 +57,7 @@ function MiniCard({ product }) {
   );
 }
 
-function ProductSection({ title, eyebrow, products }) {
+function ProductSection({ title, eyebrow, products }: { title: string; eyebrow: string; products: Product[] }) {
   const ref = useStagger([products]);
   if (!products.length) return null;
   return (
@@ -65,7 +67,7 @@ function ProductSection({ title, eyebrow, products }) {
           <p className="page-eyebrow">{eyebrow}</p>
           <h2 className="font-display text-2xl md:text-3xl font-light text-cream">{title}</h2>
         </div>
-        <div ref={ref} className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6">
+        <div ref={ref as React.RefObject<HTMLDivElement>} className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6">
           {products.map((p) => <MiniCard key={p.id} product={p} />)}
         </div>
       </div>
@@ -78,13 +80,13 @@ export default function ProdutoPage() {
   const navigate = useNavigate();
   const { addItem } = useCart();
 
-  const [product, setProduct]     = useState(null);
-  const [allProducts, setAll]     = useState([]);
+  const [product, setProduct]     = useState<Product | null>(null);
+  const [allProducts, setAll]     = useState<Product[]>([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState('');
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError]   = useState(false);
-  const [selectedSize, setSize]   = useState('');
+  const [selectedSize, setSize]   = useState<import('../types').ProductSize | ''>('');
   const [added, setAdded]         = useState(false);
 
   useRecentlyViewed(product);
@@ -95,13 +97,13 @@ export default function ProdutoPage() {
     setImgError(false);
     setSize('');
 
-    Promise.all([getProduct(id), getProducts()])
-      .then(([p, all]) => {
+    Promise.all([getProduct(id!), getProducts()])
+      .then(([{ product: p }, { products: all }]) => {
         setProduct(p);
         setAll(all);
         setSize(p.sizes?.[0] || '');
       })
-      .catch((e) => setError(e.message))
+      .catch((e) => setError(e instanceof Error ? e.message : 'Erro'))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -150,7 +152,7 @@ export default function ProdutoPage() {
     .slice(0, 5);
 
   function handleAdd() {
-    if (!selectedSize) return;
+    if (!selectedSize || !product) return;
     addItem(product, selectedSize);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);

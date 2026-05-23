@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRecommendations } from '../services/api';
 import Navbar from '../components/Navbar';
+import type { QuizAnswers } from '../types';
 
 const QUESTIONS = [
   {
@@ -50,7 +51,7 @@ const QUESTIONS = [
 
 export default function QuizPage() {
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState<Partial<QuizAnswers>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -58,26 +59,29 @@ export default function QuizPage() {
   const current = QUESTIONS[step];
   const progress = ((step + 1) / QUESTIONS.length) * 100;
 
-  function selectOption(option) {
+  function selectOption(option: string) {
+    const key = current.id as keyof QuizAnswers;
     if (current.multi) {
-      const prev = answers[current.id] || [];
+      const prev = ((answers as Record<string, unknown>)[current.id] as string[]) || [];
       const updated = prev.includes(option)
         ? prev.filter((o) => o !== option)
         : [...prev, option];
-      setAnswers((a) => ({ ...a, [current.id]: updated }));
+      setAnswers((a) => ({ ...a, [key]: updated }));
     } else {
-      setAnswers((a) => ({ ...a, [current.id]: option }));
+      setAnswers((a) => ({ ...a, [key]: option }));
     }
   }
 
-  function isSelected(option) {
-    if (current.multi) return (answers[current.id] || []).includes(option);
-    return answers[current.id] === option;
+  function isSelected(option: string) {
+    const val = (answers as Record<string, unknown>)[current.id];
+    if (current.multi) return ((val as string[]) || []).includes(option);
+    return val === option;
   }
 
   function canAdvance() {
-    if (current.multi) return (answers[current.id] || []).length > 0;
-    return !!answers[current.id];
+    const val = (answers as Record<string, unknown>)[current.id];
+    if (current.multi) return ((val as string[]) || []).length > 0;
+    return !!val;
   }
 
   async function handleNext() {
@@ -89,10 +93,10 @@ export default function QuizPage() {
       setIsLoading(true);
       setError('');
       try {
-        const result = await getRecommendations(answers);
+        const result = await getRecommendations(answers as QuizAnswers);
         navigate('/results', { state: { result } });
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Erro');
         setIsLoading(false);
       }
     }

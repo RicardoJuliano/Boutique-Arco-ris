@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getOrder } from '../services/api';
+import type { Order } from '../types';
 
 export default function OrderConfirmationPage() {
   const { id } = useParams();
-  const [order, setOrder]   = useState(null);
+  const [order, setOrder]   = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState('');
 
   useEffect(() => {
+    if (!id) { setLoading(false); return; }
     getOrder(id)
       .then(({ order }) => setOrder(order))
       .catch(e => setError(e.message))
@@ -38,11 +40,12 @@ export default function OrderConfirmationPage() {
     );
   }
 
-  const statusLabel = {
+  const STATUS_LABELS: Record<string, string> = {
     processing: 'Em Processamento',
     shipped: 'Enviado',
     delivered: 'Entregue',
-  }[order.status] || order.status;
+  };
+  const statusLabel = STATUS_LABELS[order.status] || order.status;
 
   return (
     <div className="min-h-screen bg-bg">

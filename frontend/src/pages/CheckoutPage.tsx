@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useCart } from '../context/CartContext';
 import { createOrder, getFreight } from '../services/api';
+import type { FreightResponse } from '../types';
 
 const STEPS = ['Endereço', 'Pagamento', 'Revisão'];
 
@@ -21,16 +23,16 @@ export default function CheckoutPage() {
   const [address, setAddress]           = useState({ name: '', street: '', district: '', city: '', state: '', zip: '', phone: '', complement: '' });
 
   // Frete dinâmico dos Correios
-  const [freightOptions, setFreightOptions] = useState(null);
+  const [freightOptions, setFreightOptions] = useState<FreightResponse['shipping'] | null>(null);
   const [shippingMethod, setShippingMethod] = useState('pac');
 
   // Pagamento
   const [paymentMethod, setPaymentMethod] = useState('pix');
   const [card, setCard] = useState({ number: '', name: '', expiry: '', cvv: '' });
 
-  const cepTimeout = useRef(null);
+  const cepTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const shipping    = freightOptions?.[shippingMethod];
+  const shipping    = freightOptions?.[shippingMethod as keyof FreightResponse['shipping']];
   const shippingFee = shipping?.price ?? 0;
   const total       = subtotal + shippingFee;
 
@@ -48,7 +50,7 @@ export default function CheckoutPage() {
       return;
     }
 
-    clearTimeout(cepTimeout.current);
+    if (cepTimeout.current) clearTimeout(cepTimeout.current);
     cepTimeout.current = setTimeout(async () => {
       setCepLoading(true);
       setCepError('');
@@ -65,23 +67,23 @@ export default function CheckoutPage() {
           zip:      data.address.zip,
         }));
       } catch (e) {
-        setCepError(e.message);
+        setCepError(e instanceof Error ? e.message : 'Erro ao calcular frete');
         setFreightOptions(null);
       } finally {
         setCepLoading(false);
       }
     }, 600);
 
-    return () => clearTimeout(cepTimeout.current);
+    return () => { if (cepTimeout.current) clearTimeout(cepTimeout.current); };
   }, [cep]);
 
-  function handleCepChange(e) {
+  function handleCepChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw   = e.target.value.replace(/\D/g, '').slice(0, 8);
     const fmt   = raw.length > 5 ? `${raw.slice(0, 5)}-${raw.slice(5)}` : raw;
     setCep(fmt);
   }
 
-  function handleAddrChange(e) {
+  function handleAddrChange(e: React.ChangeEvent<HTMLInputElement>) {
     setAddress(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
@@ -100,7 +102,7 @@ export default function CheckoutPage() {
       clearCart();
       navigate(`/pedido/${data.orderId}`);
     } catch (e) {
-      setError(e.message);
+      setError(e instanceof Error ? e.message : 'Erro ao confirmar pedido');
     } finally {
       setSaving(false);
     }

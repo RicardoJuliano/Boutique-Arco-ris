@@ -1,6 +1,7 @@
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
+import type { Recommendation } from '../types';
 
 export default function ResultsPage() {
   const location = useLocation();
@@ -42,8 +43,10 @@ export default function ResultsPage() {
 
         {/* Cards de produtos */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
-          {result.recommendations.map((rec, i) => (
-            <ProductCard key={rec.id} product={rec.product} reason={rec.reason} index={i} />
+          {result.recommendations.map((rec: Recommendation, i: number) => (
+            rec.product && (
+              <ProductCard key={rec.id} product={rec.product} reason={rec.reason} index={i} />
+            )
           ))}
         </div>
 

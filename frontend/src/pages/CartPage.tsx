@@ -2,6 +2,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../hooks/useAuth';
+import type { Product, ProductSize } from '../types';
+
+interface CartItemProps {
+  product: Product;
+  size: ProductSize;
+  quantity: number;
+  onRemove: () => void;
+  onQty: (q: number) => void;
+}
 
 export default function CartPage() {
   const { items, subtotal, removeItem, updateQty, itemCount } = useCart();
@@ -79,7 +88,7 @@ export default function CartPage() {
   );
 }
 
-function CartItem({ product, size, quantity, onRemove, onQty }) {
+function CartItem({ product, size, quantity, onRemove, onQty }: CartItemProps) {
   return (
     <div className="flex gap-4 p-5">
       <div className="w-20 h-28 bg-surface2 shrink-0 overflow-hidden">

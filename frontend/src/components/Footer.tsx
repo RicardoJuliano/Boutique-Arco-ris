@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 const WHATSAPP_URL = 'https://wa.me/5538999223190?text=Ol%C3%A1%21+Vim+pelo+site+da+Boutique+Arco-%C3%8Dris+%F0%9F%8C%88';
 const INSTAGRAM_URL = 'https://instagram.com/boutiquearcoiris_';
 

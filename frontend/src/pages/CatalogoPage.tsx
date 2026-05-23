@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import type React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getProducts } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { useStagger } from '../hooks/useStagger';
 import { useCart } from '../context/CartContext';
+import type { Product } from '../types';
 
 const CATEGORIES = [
   { key: 'todos',    label: 'Todos'            },
@@ -30,7 +32,7 @@ function SkeletonGrid() {
   );
 }
 
-function ProductItem({ product }) {
+function ProductItem({ product }: { product: Product }) {
   const [imgError, setImgError]   = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const { addItem } = useCart();
@@ -133,14 +135,14 @@ function ProductItem({ product }) {
 
 export default function CatalogoPage() {
   const { isAuthenticated } = useAuth();
-  const [products, setProducts]         = useState([]);
+  const [products, setProducts]         = useState<Product[]>([]);
   const [loading, setLoading]           = useState(true);
   const [activeCategory, setActiveCategory] = useState('todos');
   const gridRef = useStagger([products, activeCategory]);
 
   useEffect(() => {
     getProducts()
-      .then(setProducts)
+      .then(({ products }) => setProducts(products))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -201,7 +203,7 @@ export default function CatalogoPage() {
             <p className="font-body text-xs font-light text-muted tracking-widest uppercase mb-8">
               {filtered.length} {filtered.length === 1 ? 'peça' : 'peças'}
             </p>
-            <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+            <div ref={gridRef as React.RefObject<HTMLDivElement>} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
               {filtered.map((product) => (
                 <ProductItem key={product.id} product={product} />
               ))}

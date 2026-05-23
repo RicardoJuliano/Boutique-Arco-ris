@@ -1,6 +1,13 @@
 import { useState } from 'react';
+import type { Product } from '../types';
 
-export default function ProductCard({ product, reason, index }) {
+interface Props {
+  product: Product;
+  reason?: string;
+  index: number;
+}
+
+export default function ProductCard({ product, reason, index }: Props) {
   const [imgError, setImgError]   = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 

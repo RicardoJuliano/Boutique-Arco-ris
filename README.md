@@ -30,6 +30,7 @@ Aplicação web fullstack de portfólio que combina um e-commerce de moda comple
 | Tecnologia | Versão | Por quê |
 |---|---|---|
 | React | 18 | SPA moderna com renderização eficiente via reconciliação |
+| TypeScript | 5 | Tipagem estática — contratos explícitos entre componentes e API, erros em tempo de compilação |
 | Vite | 5 | Build tool com HMR instantâneo — DX superior ao CRA |
 | React Router | v6 | Roteamento declarativo com rotas protegidas (`PrivateRoute`, `AdminRoute`) |
 | Tailwind CSS | 3 | Utilitário — estilos co-localizados com o componente, sem CSS morto |
@@ -99,37 +100,39 @@ boutique-arco-iris/
 │
 └── frontend/
     └── src/
+        ├── types/
+        │   └── index.ts             # Interfaces e tipos centralizados (Product, Order, Cart...)
         ├── context/
-        │   ├── AuthContext.jsx      # Estado global de autenticação (token no cookie, não no estado)
-        │   └── CartContext.jsx      # Carrinho global persistente entre páginas
+        │   ├── AuthContext.tsx      # Estado global de autenticação (token no cookie, não no estado)
+        │   └── CartContext.tsx      # Carrinho global persistente entre páginas
         ├── hooks/
-        │   ├── useAuth.js           # Acesso conveniente ao AuthContext
-        │   ├── useRecentlyViewed.js # Produtos visitados recentemente (localStorage)
-        │   └── useStagger.js        # Animações de entrada em sequência
+        │   ├── useAuth.ts           # Acesso conveniente ao AuthContext
+        │   ├── useRecentlyViewed.ts # Produtos visitados recentemente (localStorage)
+        │   └── useStagger.ts        # Animações de entrada em sequência
         ├── components/
-        │   ├── PrivateRoute.jsx     # Redireciona para /login se não autenticado
-        │   ├── AdminRoute.jsx       # Redireciona se não for admin
-        │   ├── Navbar.jsx
-        │   ├── Footer.jsx
-        │   └── ProductCard.jsx
+        │   ├── PrivateRoute.tsx     # Redireciona para /login se não autenticado
+        │   ├── AdminRoute.tsx       # Redireciona se não for admin
+        │   ├── Navbar.tsx
+        │   ├── Footer.tsx
+        │   └── ProductCard.tsx
         ├── services/
-        │   └── api.js               # fetch centralizado com credentials: 'include'
+        │   └── api.ts               # fetch centralizado com credentials: 'include'
         ├── utils/
-        │   └── complementMap.js     # Mapeia categorias a produtos complementares ("Complete o Look")
+        │   └── complementMap.ts     # Mapeia categorias a produtos complementares ("Complete o Look")
         └── pages/
-            ├── HomePage.jsx
-            ├── CatalogoPage.jsx
-            ├── ProdutoPage.jsx      # Produto individual + recently viewed
-            ├── CartPage.jsx
-            ├── CheckoutPage.jsx     # Endereço + frete + pagamento
-            ├── OrderConfirmationPage.jsx
-            ├── LoginPage.jsx
-            ├── RegisterPage.jsx
-            ├── QuizPage.jsx
-            ├── ResultsPage.jsx
-            ├── HistoryPage.jsx
-            ├── AdminProductsPage.jsx
-            └── ProductFormPage.jsx      # Criar/editar produto com upload de imagem
+            ├── HomePage.tsx
+            ├── CatalogoPage.tsx
+            ├── ProdutoPage.tsx      # Produto individual + recently viewed
+            ├── CartPage.tsx
+            ├── CheckoutPage.tsx     # Endereço + frete + pagamento
+            ├── OrderConfirmationPage.tsx
+            ├── LoginPage.tsx
+            ├── RegisterPage.tsx
+            ├── QuizPage.tsx
+            ├── ResultsPage.tsx
+            ├── HistoryPage.tsx
+            ├── AdminProductsPage.tsx
+            └── ProductFormPage.tsx      # Criar/editar produto com upload de imagem
 ```
 
 **Fluxo de uma requisição:**

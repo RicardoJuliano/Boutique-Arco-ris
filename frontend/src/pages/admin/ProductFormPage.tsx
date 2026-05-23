@@ -44,16 +44,16 @@ export default function ProductFormPage() {
 
   const [form, setForm] = useState(empty);
   const [imageUrl, setImageUrl] = useState('');
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const fileRef = useRef();
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isEdit) return;
+    if (!isEdit || !id) return;
     adminGetProduct(id)
       .then(({ product }) => {
         setForm({
@@ -72,26 +72,27 @@ export default function ProductFormPage() {
         setImageUrl(product.image_url || '');
         setImagePreview(product.image_url || '');
       })
-      .catch((e) => setError(e.message))
+      .catch((e) => setError(e instanceof Error ? e.message : 'Erro'))
       .finally(() => setLoading(false));
   }, [id, isEdit]);
 
-  function handleChange(e) {
-    const { name, value, type, checked } = e.target;
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   }
 
-  function handleFileChange(e) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   }
 
-  function splitArray(str) {
+  function splitArray(str: string) {
     return str
       .split(',')
-      .map((s) => s.trim())
+      .map((s: string) => s.trim())
       .filter(Boolean);
   }
 
@@ -104,13 +105,13 @@ export default function ProductFormPage() {
       setImageFile(null);
       return data.url;
     } catch (e) {
-      throw new Error('Erro no upload: ' + e.message);
+      throw new Error('Erro no upload: ' + (e instanceof Error ? e.message : 'Erro'));
     } finally {
       setUploading(false);
     }
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setSaving(true);
@@ -133,7 +134,7 @@ export default function ProductFormPage() {
         imageUrl: finalImageUrl || undefined,
       };
 
-      if (isEdit) {
+      if (isEdit && id) {
         await adminUpdateProduct(id, payload);
       } else {
         await adminCreateProduct(payload);
@@ -141,7 +142,7 @@ export default function ProductFormPage() {
 
       navigate('/admin/produtos');
     } catch (e) {
-      setError(e.message);
+      setError(e instanceof Error ? e.message : 'Erro');
     } finally {
       setSaving(false);
     }
@@ -227,7 +228,7 @@ export default function ProductFormPage() {
                 <label className="field-label">{label} <span className="normal-case text-muted/60">(separe por vírgula)</span></label>
                 <input
                   name={key}
-                  value={form[key]}
+                  value={(form as Record<string, unknown>)[key] as string}
                   onChange={handleChange}
                   className="field-input"
                   placeholder={key === 'sizes' ? 'P, M, G, GG' : key === 'colors' ? 'Rosa, Branco, Preto' : ''}
@@ -286,7 +287,7 @@ export default function ProductFormPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => fileRef.current.click()}
+                    onClick={() => fileRef.current?.click()}
                     className="btn-gold btn-outline text-sm"
                   >
                     {imagePreview ? 'Trocar foto' : 'Escolher foto'}

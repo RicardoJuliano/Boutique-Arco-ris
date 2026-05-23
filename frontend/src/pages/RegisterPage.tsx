@@ -6,20 +6,20 @@ import Navbar from '../components/Navbar';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string[] | string | undefined>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  function handleChange(e) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     if (errors[e.target.name]) {
       setErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
     }
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
@@ -29,10 +29,11 @@ export default function RegisterPage() {
       login(user);
       navigate('/quiz');
     } catch (err) {
-      if (err.details) {
-        setErrors(err.details);
+      const error = err as { details?: Record<string, string[]>; message?: string };
+      if (error.details) {
+        setErrors(error.details);
       } else {
-        setErrors({ _global: err.message });
+        setErrors({ _global: error.message ?? 'Erro ao criar conta' });
       }
     } finally {
       setIsLoading(false);

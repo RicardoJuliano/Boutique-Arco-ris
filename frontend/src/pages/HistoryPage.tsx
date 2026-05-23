@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { getHistory } from '../services/api';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
+import type { HistoryEntry, Recommendation } from '../types';
 
 export default function HistoryPage() {
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -74,7 +75,7 @@ export default function HistoryPage() {
                     record.answers.style,
                     record.answers.size,
                     record.answers.budget,
-                  ].map((tag) => (
+                  ].filter((tag): tag is string => typeof tag === 'string').map((tag) => (
                     <span key={tag} className="badge">{tag}</span>
                   ))}
                 </div>
@@ -85,8 +86,10 @@ export default function HistoryPage() {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {record.result.recommendations.map((rec, i) => (
-                  <ProductCard key={rec.id} product={rec.product} reason={rec.reason} index={i} />
+                {record.result.recommendations.map((rec: Recommendation, i: number) => (
+                  rec.product && (
+                    <ProductCard key={rec.id} product={rec.product} reason={rec.reason} index={i} />
+                  )
                 ))}
               </div>
             </div>

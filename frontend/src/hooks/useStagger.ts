@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type DependencyList } from 'react';
 
-export function useStagger(deps = []) {
-  const ref = useRef(null);
+export function useStagger(deps: DependencyList = []) {
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const container = ref.current;
@@ -23,7 +23,7 @@ export function useStagger(deps = []) {
     );
 
     items.forEach((item, i) => {
-      item.style.transitionDelay = `${i * 65}ms`;
+      (item as HTMLElement).style.transitionDelay = `${i * 65}ms`;
       observer.observe(item);
     });
 

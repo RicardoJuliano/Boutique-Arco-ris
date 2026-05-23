@@ -19,7 +19,7 @@ export default function LoginPage() {
   const ALLOWED_PREFIXES = ['/quiz', '/catalogo', '/produto/', '/carrinho', '/checkout', '/history', '/pedido/'];
   const from = rawFrom && (rawFrom === '/' || ALLOWED_PREFIXES.some(p => rawFrom.startsWith(p))) ? rawFrom : '/quiz';
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -29,7 +29,8 @@ export default function LoginPage() {
       login(user);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message);
+      const error = err as { message?: string };
+      setError(error.message ?? 'Erro ao entrar');
     } finally {
       setIsLoading(false);
     }
