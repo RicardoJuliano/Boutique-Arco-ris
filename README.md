@@ -327,4 +327,4 @@ console.log('Usuário promovido a admin.');
 **Ricardo Juliano Jr**
 Desenvolvedor front-end em transição para desenvolvimento fullstack, construindo na prática um projeto de cada vez.
 
-Projeto feito para fins de estudo e portfólio. Conceito fictício — Boutique Arco-Íris não é uma loja real.
+Projeto desenvolvido para a Boutique Arco-Íris, loja multimarcas localizada em Buenópolis/MG. A aplicação está em desenvolvimento ativo e não está em produção.
