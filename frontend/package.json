@@ -1,7 +1,7 @@
 {
-  "name": "elite-moda-frontend",
+  "name": "boutique-arco-iris-frontend",
   "version": "1.0.0",
-  "description": "Frontend da loja Élite Moda — SPA React com Vite",
+  "description": "Frontend da Boutique Arco-Íris — SPA React com Vite",
   "type": "module",
   "scripts": {
     "dev": "vite",

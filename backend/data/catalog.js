@@ -1,6 +1,6 @@
 /**
  * data/catalog.js
- * Catálogo estático de produtos da loja Élite Moda.
+ * Catálogo estático de produtos da Boutique Arco-Íris.
  * Em produção, substituir por queries ao banco de dados com paginação.
  *
  * Como adicionar um produto:
