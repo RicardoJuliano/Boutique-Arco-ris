@@ -17,24 +17,24 @@ const CATEGORIES = [
 ];
 
 const ARRAY_FIELDS = [
-  { key: 'style', label: 'Estilos' },
-  { key: 'colors', label: 'Cores' },
+  { key: 'style',     label: 'Estilos' },
+  { key: 'colors',    label: 'Cores' },
   { key: 'occasions', label: 'Ocasiões' },
-  { key: 'sizes', label: 'Tamanhos' },
+  { key: 'sizes',     label: 'Tamanhos' },
 ];
 
-const empty = {
-  name: '',
-  price: '',
-  category: CATEGORIES[0].value,
-  style: '',
-  colors: '',
-  occasions: '',
-  sizes: '',
+const EMPTY_FORM = {
+  name:        '',
+  price:       '',
+  category:    CATEGORIES[0].value,
+  style:       '',
+  colors:      '',
+  occasions:   '',
+  sizes:       '',
   description: '',
-  tag: '',
-  stock: '0',
-  active: true,
+  tag:         '',
+  stock:       '0',
+  active:      true,
 };
 
 export default function ProductFormPage() {
@@ -42,14 +42,14 @@ export default function ProductFormPage() {
   const isEdit = Boolean(id) && id !== 'novo';
   const navigate = useNavigate();
 
-  const [form, setForm] = useState(empty);
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [form, setForm]             = useState(EMPTY_FORM);
+  const [imageUrl, setImageUrl]     = useState('');
+  const [imageFile, setImageFile]   = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState('');
-  const [loading, setLoading] = useState(isEdit);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading]       = useState(isEdit);
+  const [saving, setSaving]         = useState(false);
+  const [uploading, setUploading]   = useState(false);
+  const [error, setError]           = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -57,17 +57,17 @@ export default function ProductFormPage() {
     adminGetProduct(id)
       .then(({ product }) => {
         setForm({
-          name: product.name || '',
-          price: String(product.price || ''),
-          category: product.category || CATEGORIES[0],
-          style: Array.isArray(product.style) ? product.style.join(', ') : '',
-          colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
-          occasions: Array.isArray(product.occasions) ? product.occasions.join(', ') : '',
-          sizes: Array.isArray(product.sizes) ? product.sizes.join(', ') : '',
+          name:        product.name || '',
+          price:       String(product.price || ''),
+          category:    product.category || CATEGORIES[0].value,
+          style:       Array.isArray(product.style) ? product.style.join(', ') : '',
+          colors:      Array.isArray(product.colors) ? product.colors.join(', ') : '',
+          occasions:   Array.isArray(product.occasions) ? product.occasions.join(', ') : '',
+          sizes:       Array.isArray(product.sizes) ? product.sizes.join(', ') : '',
           description: product.desc || '',
-          tag: product.tag || '',
-          stock: String(product.stock ?? 0),
-          active: product.active !== false,
+          tag:         product.tag || '',
+          stock:       String(product.stock ?? 0),
+          active:      product.active !== false,
         });
         setImageUrl(product.image_url || '');
         setImagePreview(product.image_url || '');
@@ -90,10 +90,7 @@ export default function ProductFormPage() {
   }
 
   function splitArray(str: string) {
-    return str
-      .split(',')
-      .map((s: string) => s.trim())
-      .filter(Boolean);
+    return str.split(',').map((s: string) => s.trim()).filter(Boolean);
   }
 
   async function handleUpload() {
@@ -120,18 +117,18 @@ export default function ProductFormPage() {
       if (imageFile) finalImageUrl = await handleUpload();
 
       const payload = {
-        name: form.name,
-        price: Number(form.price),
-        category: form.category,
-        style: splitArray(form.style),
-        colors: splitArray(form.colors),
-        occasions: splitArray(form.occasions),
-        sizes: splitArray(form.sizes),
+        name:        form.name,
+        price:       Number(form.price),
+        category:    form.category as import('../../types').ProductCategory,
+        style:       splitArray(form.style),
+        colors:      splitArray(form.colors),
+        occasions:   splitArray(form.occasions),
+        sizes:       splitArray(form.sizes),
         description: form.description,
-        tag: form.tag || null,
-        stock: Number(form.stock),
-        active: form.active,
-        imageUrl: finalImageUrl || undefined,
+        tag:         form.tag || null,
+        stock:       Number(form.stock),
+        active:      form.active,
+        imageUrl:    finalImageUrl || undefined,
       };
 
       if (isEdit && id) {
@@ -225,13 +222,19 @@ export default function ProductFormPage() {
 
             {ARRAY_FIELDS.map(({ key, label }) => (
               <div key={key}>
-                <label className="field-label">{label} <span className="normal-case text-muted/60">(separe por vírgula)</span></label>
+                <label className="field-label">
+                  {label}{' '}
+                  <span className="normal-case text-muted/60">(separe por vírgula)</span>
+                </label>
                 <input
                   name={key}
                   value={(form as Record<string, unknown>)[key] as string}
                   onChange={handleChange}
                   className="field-input"
-                  placeholder={key === 'sizes' ? 'P, M, G, GG' : key === 'colors' ? 'Rosa, Branco, Preto' : ''}
+                  placeholder={
+                    key === 'sizes'  ? 'P, M, G, GG' :
+                    key === 'colors' ? 'Rosa, Branco, Preto' : ''
+                  }
                 />
               </div>
             ))}
@@ -249,7 +252,10 @@ export default function ProductFormPage() {
             </div>
 
             <div>
-              <label className="field-label">Tag <span className="normal-case text-muted/60">(ex: novo, promoção)</span></label>
+              <label className="field-label">
+                Tag{' '}
+                <span className="normal-case text-muted/60">(ex: novo, promoção)</span>
+              </label>
               <input
                 name="tag"
                 value={form.tag}
@@ -268,7 +274,9 @@ export default function ProductFormPage() {
                 onChange={handleChange}
                 className="accent-gold w-4 h-4"
               />
-              <label htmlFor="active" className="field-label mb-0 cursor-pointer">Produto ativo (visível na loja)</label>
+              <label htmlFor="active" className="field-label mb-0 cursor-pointer">
+                Produto ativo (visível na loja)
+              </label>
             </div>
 
             <div>

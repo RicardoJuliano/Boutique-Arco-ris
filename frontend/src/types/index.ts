@@ -126,6 +126,23 @@ export interface FreightResponse {
   };
 }
 
+// ─── Admin ─────────────────────────────────────────────────────────────────
+
+export interface ProductPayload {
+  name: string;
+  price: number;
+  category: ProductCategory;
+  style: string[];
+  colors: string[];
+  occasions: string[];
+  sizes: string[];
+  description?: string;
+  tag?: string | null;
+  stock: number;
+  active?: boolean;
+  imageUrl?: string;
+}
+
 // ─── Erro de API ───────────────────────────────────────────────────────────
 
 export interface ApiError extends Error {

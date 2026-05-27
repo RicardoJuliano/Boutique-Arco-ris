@@ -20,8 +20,7 @@ const orderSchema = z.object({
   }),
   shippingMethod: z.enum(['pac', 'sedex']),
   paymentMethod:  z.enum(['card', 'pix']),
-  // shippingFee vindo do frontend após cálculo real pelo /api/freight
-  shippingFee: z.number().positive().max(500),
+  shippingFee:    z.number().positive().max(500),
 });
 
 exports.createOrder = function createOrder(userId, body) {
@@ -29,7 +28,7 @@ exports.createOrder = function createOrder(userId, body) {
 
   return db.transaction(() => {
     let subtotal = 0;
-    const enriched = [];
+    const enrichedItems = [];
 
     for (const item of data.items) {
       const product = db.prepare(
@@ -43,8 +42,7 @@ exports.createOrder = function createOrder(userId, body) {
         throw Object.assign(new Error(`Estoque insuficiente para "${product.name}"`), { status: 422 });
       }
 
-      // Decrementa estoque com guard — se outra transação concurrent decrementou,
-      // o changes === 0 garante que não vendemos o que não temos
+      // guard de concorrência: só decrementa se o estoque ainda for suficiente no momento do UPDATE
       const { changes } = db.prepare(
         'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?'
       ).run(item.quantity, product.id, item.quantity);
@@ -53,20 +51,20 @@ exports.createOrder = function createOrder(userId, body) {
       }
 
       subtotal += product.price * item.quantity;
-      enriched.push({ ...item, unitPrice: product.price });
+      enrichedItems.push({ ...item, unitPrice: product.price });
     }
 
     const total = subtotal + data.shippingFee;
     const orderId = orderRepository.create({
       userId,
       total,
-      shippingFee: data.shippingFee,
-      address: data.address,
+      shippingFee:    data.shippingFee,
+      address:        data.address,
       shippingMethod: data.shippingMethod,
       paymentMethod:  data.paymentMethod,
     });
 
-    for (const item of enriched) {
+    for (const item of enrichedItems) {
       orderRepository.addItem({
         orderId,
         productId: item.productId,

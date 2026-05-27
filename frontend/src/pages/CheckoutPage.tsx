@@ -16,17 +16,16 @@ export default function CheckoutPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState('');
 
-  // Endereço
-  const [cep, setCep]                   = useState('');
-  const [cepLoading, setCepLoading]     = useState(false);
-  const [cepError, setCepError]         = useState('');
-  const [address, setAddress]           = useState({ name: '', street: '', district: '', city: '', state: '', zip: '', phone: '', complement: '' });
+  const [cep, setCep]               = useState('');
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError]     = useState('');
+  const [address, setAddress]       = useState({
+    name: '', street: '', district: '', city: '', state: '', zip: '', phone: '', complement: '',
+  });
 
-  // Frete dinâmico dos Correios
   const [freightOptions, setFreightOptions] = useState<FreightResponse['shipping'] | null>(null);
   const [shippingMethod, setShippingMethod] = useState('pac');
 
-  // Pagamento
   const [paymentMethod, setPaymentMethod] = useState('pix');
   const [card, setCard] = useState({ number: '', name: '', expiry: '', cvv: '' });
 
@@ -36,12 +35,11 @@ export default function CheckoutPage() {
   const shippingFee = shipping?.price ?? 0;
   const total       = subtotal + shippingFee;
 
-  if (items.length === 0) {
-    navigate('/carrinho');
-    return null;
-  }
+  // redireciona para o carrinho se ele for esvaziado durante o checkout
+  useEffect(() => {
+    if (items.length === 0) navigate('/carrinho');
+  }, [items.length, navigate]);
 
-  // Busca CEP automaticamente quando tem 8 dígitos
   useEffect(() => {
     const digits = cep.replace(/\D/g, '');
     if (digits.length !== 8) {
@@ -55,9 +53,9 @@ export default function CheckoutPage() {
       setCepLoading(true);
       setCepError('');
       try {
-        const data = await getFreight(digits, items.reduce((acc, i) => acc + i.quantity, 0));
+        const itemCount = items.reduce((acc, i) => acc + i.quantity, 0);
+        const data = await getFreight(digits, itemCount);
         setFreightOptions(data.shipping);
-        // Auto-preenche endereço se vazio
         setAddress(prev => ({
           ...prev,
           street:   prev.street   || data.address.street,
@@ -75,11 +73,11 @@ export default function CheckoutPage() {
     }, 600);
 
     return () => { if (cepTimeout.current) clearTimeout(cepTimeout.current); };
-  }, [cep]);
+  }, [cep, items]);
 
   function handleCepChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw   = e.target.value.replace(/\D/g, '').slice(0, 8);
-    const fmt   = raw.length > 5 ? `${raw.slice(0, 5)}-${raw.slice(5)}` : raw;
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
+    const fmt = raw.length > 5 ? `${raw.slice(0, 5)}-${raw.slice(5)}` : raw;
     setCep(fmt);
   }
 
@@ -96,7 +94,7 @@ export default function CheckoutPage() {
         address:        { ...address, zip: cep },
         shippingMethod,
         paymentMethod,
-        shippingFee:    shippingFee,
+        shippingFee,
       };
       const data = await createOrder(payload);
       clearCart();
@@ -108,7 +106,11 @@ export default function CheckoutPage() {
     }
   }
 
-  const canProceed = address.name && address.street && address.city && freightOptions;
+  const canProceed =
+    address.name && address.street && address.city &&
+    address.state && address.phone && freightOptions;
+
+  if (items.length === 0) return null;
 
   return (
     <div className="min-h-screen bg-bg">
@@ -141,7 +143,6 @@ export default function CheckoutPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Formulário */}
           <div className="lg:col-span-2 space-y-4">
 
             {/* ── ETAPA 0: ENDEREÇO + FRETE ── */}
@@ -149,7 +150,6 @@ export default function CheckoutPage() {
               <div className="border border-border bg-surface p-6 space-y-5">
                 <h2 className="font-display text-xl font-light text-cream">Endereço de Entrega</h2>
 
-                {/* CEP — campo principal, dispara tudo */}
                 <div>
                   <label className="field-label">CEP</label>
                   <div className="relative">
@@ -180,7 +180,6 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                {/* Campos de endereço — aparecem após CEP válido */}
                 <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${freightOptions ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
                   <div className="sm:col-span-2">
                     <label className="field-label">Nome completo do destinatário</label>
@@ -212,7 +211,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Opções de frete — aparecem após CEP calculado */}
                 {freightOptions && (
                   <div className="border-t border-border pt-5">
                     <h3 className="font-body text-xs tracking-widest uppercase text-muted mb-4">
@@ -263,8 +261,8 @@ export default function CheckoutPage() {
                 <h2 className="font-display text-xl font-light text-cream mb-4">Método de Pagamento</h2>
                 <div className="space-y-2">
                   {[
-                    { key: 'pix',  label: 'Pix',               desc: 'Pagamento instantâneo com QR Code' },
-                    { key: 'card', label: 'Cartão de Crédito',  desc: 'Visa, Mastercard, Elo e outros' },
+                    { key: 'pix',  label: 'Pix',              desc: 'Pagamento instantâneo com QR Code' },
+                    { key: 'card', label: 'Cartão de Crédito', desc: 'Visa, Mastercard, Elo e outros' },
                   ].map(({ key, label, desc }) => (
                     <label
                       key={key}
@@ -291,9 +289,7 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {/* TODO(PCI-DSS): substituir estes campos por iframe tokenizado de gateway
-                    certificado (Stripe Elements / Mercado Pago) antes do deploy em produção.
-                    Os dados abaixo NÃO são enviados ao backend — são apenas UI de protótipo. */}
+                {/* TODO(PCI-DSS): substituir por iframe tokenizado (Stripe Elements / Mercado Pago) antes do deploy */}
                 {paymentMethod === 'card' && (
                   <div className="space-y-3 border border-border bg-surface2 p-4">
                     <div>

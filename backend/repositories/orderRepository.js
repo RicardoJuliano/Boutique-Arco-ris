@@ -21,20 +21,24 @@ exports.findById = function findById(id, userId) {
     FROM orders o JOIN users u ON u.id = o.user_id
     WHERE o.id = ? AND o.user_id = ?
   `).get(id, userId);
+
   if (!order) return null;
+
   order.address = JSON.parse(order.address);
   order.items = db.prepare(`
     SELECT oi.*, p.name as product_name, p.image_url
     FROM order_items oi JOIN products p ON p.id = oi.product_id
     WHERE oi.order_id = ?
   `).all(id);
+
   return order;
 };
 
 exports.findByUser = function findByUser(userId) {
   const orders = db.prepare(`
-    SELECT id, status, total, shipping_fee, shipping_method, payment_method, created_at
+    SELECT id, status, total, shipping_fee, shipping_method, payment_method, address, created_at
     FROM orders WHERE user_id = ? ORDER BY created_at DESC
   `).all(userId);
+
   return orders.map(o => ({ ...o, address: JSON.parse(o.address || '{}') }));
 };

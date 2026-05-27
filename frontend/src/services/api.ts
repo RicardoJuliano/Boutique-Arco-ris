@@ -1,4 +1,13 @@
-import type { User, Product, QuizAnswers, RecommendationResult, HistoryEntry, FreightResponse, Order } from '../types';
+import type {
+  User,
+  Product,
+  ProductPayload,
+  QuizAnswers,
+  RecommendationResult,
+  HistoryEntry,
+  FreightResponse,
+  Order,
+} from '../types';
 
 const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
 
@@ -65,13 +74,13 @@ export const adminListProducts = () =>
 export const adminGetProduct = (id: number | string) =>
   request<{ product: Product }>(`/admin/products/${id}`);
 
-export const adminCreateProduct = (data: unknown) =>
+export const adminCreateProduct = (data: ProductPayload) =>
   request<{ product: Product }>('/admin/products', {
     method: 'POST',
     body: JSON.stringify(data),
   });
 
-export const adminUpdateProduct = (id: number | string, data: unknown) =>
+export const adminUpdateProduct = (id: number | string, data: Partial<ProductPayload>) =>
   request<{ product: Product }>(`/admin/products/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
@@ -84,7 +93,8 @@ export const adminUploadImage = (file: File, productId?: number | string) => {
   const form = new FormData();
   form.append('image', file);
   if (productId) form.append('productId', String(productId));
-  return fetch('/api/admin/products/upload', {
+
+  return fetch(`${BASE}/admin/products/upload`, {
     method: 'POST',
     credentials: 'include',
     body: form,

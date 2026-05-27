@@ -5,6 +5,10 @@ const userRepository = require('../repositories/userRepository');
 const SALT_ROUNDS = 12;
 const JWT_EXPIRES_IN = '7d';
 
+// Hash fixo usado quando o usuário não existe — garante tempo de resposta constante
+// e evita timing attack que revelaria quais emails estão cadastrados
+const DUMMY_HASH = '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/sDMqbAm';
+
 exports.register = async function register({ name, email, password }) {
   const existing = userRepository.findByEmail(email);
   if (existing) {
@@ -14,8 +18,7 @@ exports.register = async function register({ name, email, password }) {
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  // Novos usuários SEMPRE começam sem privilégios admin (isAdmin = 0).
-  // Promoção a admin deve ser feita diretamente no banco por um admin existente.
+  // isAdmin sempre 0 no cadastro — promoção deve ser feita diretamente no banco
   const user = userRepository.create({ name, email, passwordHash, isAdmin: 0 });
   const token = generateToken(user);
 
@@ -24,9 +27,7 @@ exports.register = async function register({ name, email, password }) {
 
 exports.login = async function login({ email, password }) {
   const found = userRepository.findByEmail(email);
-
-  const dummyHash = '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/sDMqbAm';
-  const hashToCompare = found ? found.password_hash : dummyHash;
+  const hashToCompare = found ? found.password_hash : DUMMY_HASH;
   const match = await bcrypt.compare(password, hashToCompare);
 
   if (!found || !match) {

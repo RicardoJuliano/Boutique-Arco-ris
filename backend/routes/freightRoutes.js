@@ -1,11 +1,9 @@
 const express = require('express');
-const router  = express.Router();
+const router = express.Router();
 
-// CEP de origem — agência dos Correios de Buenópolis/MG (ponto de distribuição)
 const ORIGIN_CEP = process.env.ORIGIN_CEP || '39230000';
 
-// Zonas postais a partir de Buenópolis/MG — tabela oficial Correios 2025
-// Buenópolis fica no norte de MG, próximo à divisa com BA
+// Zonas postais a partir de Buenópolis/MG — tabela Correios 2025
 const ZONES = {
   MG: { zone: 1, pacDays: [1, 3],  sedexDays: [1, 1] },
   SP: { zone: 1, pacDays: [2, 4],  sedexDays: [1, 2] },
@@ -36,33 +34,29 @@ const ZONES = {
   RO: { zone: 5, pacDays: [11,15], sedexDays: [5, 7] },
 };
 
-// Tabela de preços Correios 2025 — PAC por zona (1-5) e faixa de peso
-// Faixas: até 300g | até 500g | até 1kg | até 2kg | acima de 2kg
+// Tabela Correios 2025 — faixas: até 500g | até 1kg | até 2kg | acima de 2kg
 const PAC_PRICES = {
-  1: [16.90, 18.50, 21.20, 25.40, 31.80],
-  2: [19.30, 21.60, 24.90, 30.20, 38.70],
-  3: [23.10, 26.20, 30.80, 38.50, 50.40],
-  4: [27.80, 31.90, 38.20, 49.20, 66.10],
-  5: [33.90, 39.80, 48.90, 64.50, 89.30],
+  1: [18.50, 21.20, 25.40, 31.80],
+  2: [21.60, 24.90, 30.20, 38.70],
+  3: [26.20, 30.80, 38.50, 50.40],
+  4: [31.90, 38.20, 49.20, 66.10],
+  5: [39.80, 48.90, 64.50, 89.30],
 };
 
-// Tabela de preços Correios 2025 — SEDEX por zona e faixa de peso
 const SEDEX_PRICES = {
-  1: [20.50, 23.30, 28.20, 35.10, 44.80],
-  2: [24.30, 28.20, 34.70, 44.60, 58.90],
-  3: [30.20, 36.00, 45.00, 58.90, 79.40],
-  4: [38.80, 47.20, 60.30, 80.60, 111.20],
-  5: [53.10, 66.50, 86.30, 118.40, 167.50],
+  1: [23.30, 28.20, 35.10, 44.80],
+  2: [28.20, 34.70, 44.60, 58.90],
+  3: [36.00, 45.00, 58.90, 79.40],
+  4: [47.20, 60.30, 80.60, 111.20],
+  5: [66.50, 86.30, 118.40, 167.50],
 };
 
-// Determina faixa de peso conforme número de peças (~400g por peça)
-function getWeightIndex(items) {
-  const kg = Math.max(1, Number(items)) * 0.4;
-  if (kg <= 0.3) return 0;
-  if (kg <= 0.5) return 1;
-  if (kg <= 1.0) return 2;
-  if (kg <= 2.0) return 3;
-  return 4;
+function getWeightIndex(itemCount) {
+  const kg = Math.max(1, Number(itemCount)) * 0.4; // ~400g por peça
+  if (kg <= 0.5) return 0;
+  if (kg <= 1.0) return 1;
+  if (kg <= 2.0) return 2;
+  return 3;
 }
 
 router.get('/', async (req, res, next) => {
@@ -74,7 +68,6 @@ router.get('/', async (req, res, next) => {
       return res.status(400).json({ error: 'CEP inválido. Informe 8 dígitos.' });
     }
 
-    // Autocomplete de endereço via ViaCEP (serviço público)
     const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`, {
       signal: AbortSignal.timeout(5000),
     });
@@ -89,33 +82,30 @@ router.get('/', async (req, res, next) => {
       return res.status(404).json({ error: 'CEP não encontrado. Verifique e tente novamente.' });
     }
 
-    const uf     = data.uf;
-    const zone   = ZONES[uf] ?? { zone: 3, pacDays: [7, 10], sedexDays: [3, 5] };
-    const wIdx   = getWeightIndex(items);
-
-    const pacPrice   = PAC_PRICES[zone.zone][wIdx];
-    const sedexPrice = SEDEX_PRICES[zone.zone][wIdx];
+    const stateCode = data.uf;
+    const zoneConfig = ZONES[stateCode] ?? { zone: 3, pacDays: [7, 10], sedexDays: [3, 5] };
+    const weightIndex = getWeightIndex(items);
 
     res.json({
       address: {
-        street:   data.logradouro  || '',
-        district: data.bairro      || '',
-        city:     data.localidade  || '',
-        state:    data.uf          || '',
-        zip:      data.cep         || cleanCep,
+        street:   data.logradouro || '',
+        district: data.bairro     || '',
+        city:     data.localidade || '',
+        state:    data.uf         || '',
+        zip:      data.cep        || cleanCep,
       },
       shipping: {
         pac: {
           code:  '04510',
-          price: pacPrice,
-          label: `PAC — ${zone.pacDays[0]} a ${zone.pacDays[1]} dias úteis`,
-          days:  zone.pacDays[1],
+          price: PAC_PRICES[zoneConfig.zone][weightIndex],
+          label: `PAC — ${zoneConfig.pacDays[0]} a ${zoneConfig.pacDays[1]} dias úteis`,
+          days:  zoneConfig.pacDays[1],
         },
         sedex: {
           code:  '04014',
-          price: sedexPrice,
-          label: `SEDEX — ${zone.sedexDays[0]} a ${zone.sedexDays[1]} dias úteis`,
-          days:  zone.sedexDays[1],
+          price: SEDEX_PRICES[zoneConfig.zone][weightIndex],
+          label: `SEDEX — ${zoneConfig.sedexDays[0]} a ${zoneConfig.sedexDays[1]} dias úteis`,
+          days:  zoneConfig.sedexDays[1],
         },
       },
     });
