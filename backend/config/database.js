@@ -24,6 +24,16 @@ try {
   db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0');
 } catch (_) {}
 
+// Adicionar barcode em bancos existentes sem a coluna
+try {
+  db.exec('ALTER TABLE products ADD COLUMN barcode TEXT');
+} catch (_) {}
+
+// Garante que ADMIN_EMAIL sempre seja admin — evita ficar bloqueado após reset de banco
+if (process.env.ADMIN_EMAIL) {
+  db.prepare('UPDATE users SET is_admin = 1 WHERE email = ? AND is_admin = 0').run(process.env.ADMIN_EMAIL);
+}
+
 // Tabela de produtos
 db.exec(`
   CREATE TABLE IF NOT EXISTS products (
@@ -62,8 +72,8 @@ const productCount = db.prepare('SELECT COUNT(*) as count FROM products').get();
 if (productCount.count === 0) {
   const CATALOG = require('../data/catalog');
   const insert = db.prepare(`
-    INSERT INTO products (name, price, category, style, colors, occasions, sizes, description, tag, stock)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (name, price, category, style, colors, occasions, sizes, description, tag, image_url, stock)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   for (const p of CATALOG) {
     insert.run(
@@ -76,8 +86,16 @@ if (productCount.count === 0) {
       JSON.stringify(p.sizes),
       p.desc || '',
       p.tag || null,
+      p.image_url || null,
       10
     );
+  }
+} else {
+  // Corrige image_url ausente em bancos gerados antes deste fix
+  const CATALOG = require('../data/catalog');
+  const update = db.prepare('UPDATE products SET image_url = ? WHERE id = ? AND image_url IS NULL');
+  for (const p of CATALOG) {
+    update.run(p.image_url || null, p.id);
   }
 }
 

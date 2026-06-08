@@ -7,14 +7,11 @@ import {
   adminUploadImage,
 } from '../../services/api';
 import Navbar from '../../components/Navbar';
+import Spinner from '../../components/Spinner';
+import BarcodeScanner from '../../components/BarcodeScanner';
+import { CATEGORIES } from '../../utils/categories';
+import { toErrorMessage } from '../../utils/format';
 
-const CATEGORIES = [
-  { value: 'vestido',   label: 'Vestidos & Saias' },
-  { value: 'camiseta',  label: 'Blusas & Tops' },
-  { value: 'calça',     label: 'Calças' },
-  { value: 'conjunto',  label: 'Conjuntos' },
-  { value: 'jaqueta',   label: 'Jaquetas & Casacos' },
-];
 
 const ARRAY_FIELDS = [
   { key: 'style',     label: 'Estilos' },
@@ -33,6 +30,7 @@ const EMPTY_FORM = {
   sizes:       '',
   description: '',
   tag:         '',
+  barcode:     '',
   stock:       '0',
   active:      true,
 };
@@ -50,6 +48,8 @@ export default function ProductFormPage() {
   const [saving, setSaving]         = useState(false);
   const [uploading, setUploading]   = useState(false);
   const [error, setError]           = useState('');
+  const [showScanner, setShowScanner] = useState(false);
+  const [imageMode, setImageMode]   = useState<'upload' | 'url'>('upload');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,13 +66,14 @@ export default function ProductFormPage() {
           sizes:       Array.isArray(product.sizes) ? product.sizes.join(', ') : '',
           description: product.desc || '',
           tag:         product.tag || '',
+          barcode:     product.barcode || '',
           stock:       String(product.stock ?? 0),
           active:      product.active !== false,
         });
         setImageUrl(product.image_url || '');
         setImagePreview(product.image_url || '');
       })
-      .catch((e) => setError(e instanceof Error ? e.message : 'Erro'))
+      .catch((e) => setError(toErrorMessage(e)))
       .finally(() => setLoading(false));
   }, [id, isEdit]);
 
@@ -102,7 +103,7 @@ export default function ProductFormPage() {
       setImageFile(null);
       return data.url;
     } catch (e) {
-      throw new Error('Erro no upload: ' + (e instanceof Error ? e.message : 'Erro'));
+      throw new Error('Erro no upload: ' + toErrorMessage(e));
     } finally {
       setUploading(false);
     }
@@ -126,6 +127,7 @@ export default function ProductFormPage() {
         sizes:       splitArray(form.sizes),
         description: form.description,
         tag:         form.tag || null,
+        barcode:     form.barcode || null,
         stock:       Number(form.stock),
         active:      form.active,
         imageUrl:    finalImageUrl || undefined,
@@ -139,7 +141,7 @@ export default function ProductFormPage() {
 
       navigate('/admin/produtos');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro');
+      setError(toErrorMessage(e));
     } finally {
       setSaving(false);
     }
@@ -150,7 +152,7 @@ export default function ProductFormPage() {
       <>
         <Navbar />
         <div className="min-h-screen bg-bg flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+          <Spinner />
         </div>
       </>
     );
@@ -158,6 +160,15 @@ export default function ProductFormPage() {
 
   return (
     <>
+      {showScanner && (
+        <BarcodeScanner
+          onScan={(code) => {
+            setForm((prev) => ({ ...prev, barcode: code }));
+            setShowScanner(false);
+          }}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
       <Navbar />
       <main className="min-h-screen bg-bg pt-24 pb-16 px-4">
         <div className="max-w-2xl mx-auto">
@@ -280,31 +291,83 @@ export default function ProductFormPage() {
             </div>
 
             <div>
-              <label className="field-label">Foto do produto</label>
-              <div className="flex gap-4 items-start">
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="w-24 h-24 object-cover border border-border" />
-                )}
-                <div className="flex-1">
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
-                    className="btn-gold btn-outline text-sm"
-                  >
-                    {imagePreview ? 'Trocar foto' : 'Escolher foto'}
-                  </button>
-                  {imageFile && (
-                    <p className="mt-2 text-xs text-muted font-body">{imageFile.name}</p>
-                  )}
-                </div>
+              <label className="field-label">Código de barras / SKU</label>
+              <div className="flex gap-2">
+                <input
+                  name="barcode"
+                  value={form.barcode}
+                  onChange={handleChange}
+                  className="field-input flex-1"
+                  placeholder="Ex: 7891234567890"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowScanner(true)}
+                  title="Escanear com câmera"
+                  className="btn-gold btn-outline px-3 py-2 text-base shrink-0"
+                >
+                  📷
+                </button>
               </div>
+            </div>
+
+            <div>
+              <label className="field-label">Foto do produto</label>
+              <div className="flex gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setImageMode('upload')}
+                  className={`text-xs font-body px-3 py-1 border transition-colors ${imageMode === 'upload' ? 'border-gold text-gold' : 'border-border text-muted'}`}
+                >
+                  Upload
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setImageMode('url')}
+                  className={`text-xs font-body px-3 py-1 border transition-colors ${imageMode === 'url' ? 'border-gold text-gold' : 'border-border text-muted'}`}
+                >
+                  URL
+                </button>
+              </div>
+
+              {imageMode === 'url' ? (
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    setImagePreview(e.target.value);
+                    setImageFile(null);
+                  }}
+                  className="field-input"
+                  placeholder="https://..."
+                />
+              ) : (
+                <div className="flex gap-4 items-start">
+                  {imagePreview && (
+                    <img src={imagePreview} alt="Preview" className="w-24 h-24 object-cover border border-border" />
+                  )}
+                  <div className="flex-1">
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="btn-gold btn-outline text-sm"
+                    >
+                      {imagePreview ? 'Trocar foto' : 'Escolher foto'}
+                    </button>
+                    {imageFile && (
+                      <p className="mt-2 text-xs text-muted font-body">{imageFile.name}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-4 pt-4">

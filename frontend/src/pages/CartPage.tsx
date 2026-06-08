@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../hooks/useAuth';
+import { formatPrice } from '../utils/format';
 import type { Product, ProductSize } from '../types';
 
 interface CartItemProps {
@@ -63,7 +64,7 @@ export default function CartPage() {
               <div className="space-y-2 py-4 border-t border-b border-border">
                 <div className="flex justify-between font-body text-sm font-light text-muted">
                   <span>{itemCount} {itemCount === 1 ? 'peça' : 'peças'}</span>
-                  <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between font-body text-sm font-light text-muted">
                   <span>Frete</span>
@@ -72,7 +73,7 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between font-display text-lg font-light text-cream">
                 <span>Subtotal</span>
-                <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <button onClick={handleCheckout} className="btn-gold w-full py-4 text-sm tracking-widest">
                 Finalizar Compra
@@ -124,7 +125,7 @@ function CartItem({ product, size, quantity, onRemove, onQty }: CartItemProps) {
             >+</button>
           </div>
           <p className="font-body text-sm font-light text-gold">
-            R$ {(product.price * quantity).toFixed(2).replace('.', ',')}
+            {formatPrice(product.price * quantity)}
           </p>
         </div>
       </div>

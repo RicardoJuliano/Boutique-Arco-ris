@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatPrice } from '../utils/format';
 import Navbar from '../components/Navbar';
 import { useCart } from '../context/CartContext';
 import { createOrder, getFreight } from '../services/api';
@@ -237,7 +238,7 @@ export default function CheckoutPage() {
                             </div>
                           </div>
                           <span className="font-display text-base font-light text-gold">
-                            R$ {opt.price.toFixed(2).replace('.', ',')}
+                            {formatPrice(opt.price)}
                           </span>
                         </label>
                       ))}
@@ -337,7 +338,7 @@ export default function CheckoutPage() {
                       <div className="flex-1">
                         <p className="font-display text-sm font-light text-cream">{product.name}</p>
                         <p className="font-body text-xs font-light text-muted">Tam. {size} · Qtd. {quantity}</p>
-                        <p className="font-body text-sm font-light text-gold mt-1">R$ {(product.price * quantity).toFixed(2).replace('.', ',')}</p>
+                        <p className="font-body text-sm font-light text-gold mt-1">{formatPrice(product.price * quantity)}</p>
                       </div>
                     </div>
                   ))}
@@ -380,20 +381,20 @@ export default function CheckoutPage() {
               {items.map(({ product, size, quantity }) => (
                 <div key={`${product.id}-${size}`} className="flex justify-between font-body text-xs font-light text-muted">
                   <span className="truncate pr-2">{product.name} ({size}) ×{quantity}</span>
-                  <span className="shrink-0">R$ {(product.price * quantity).toFixed(2).replace('.', ',')}</span>
+                  <span className="shrink-0">{formatPrice(product.price * quantity)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-border pt-3 space-y-1.5">
               <div className="flex justify-between font-body text-sm font-light text-muted">
                 <span>Subtotal</span>
-                <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between font-body text-sm font-light text-muted">
                 <span>Frete {shipping ? `(${shippingMethod.toUpperCase()})` : ''}</span>
                 <span>
                   {freightOptions
-                    ? `R$ ${shippingFee.toFixed(2).replace('.', ',')}`
+                    ? formatPrice(shippingFee)
                     : <span className="text-gold/70 text-xs">calcular CEP</span>
                   }
                 </span>
@@ -401,7 +402,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between font-display text-base font-light text-cream border-t border-border pt-3">
               <span>Total</span>
-              <span>R$ {total.toFixed(2).replace('.', ',')}</span>
+              <span>{formatPrice(total)}</span>
             </div>
           </div>
         </div>

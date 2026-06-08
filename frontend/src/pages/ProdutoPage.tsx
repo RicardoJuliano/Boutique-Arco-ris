@@ -3,45 +3,26 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import type React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ProductImage from '../components/ProductImage';
 import { getProduct, getProducts } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useStagger } from '../hooks/useStagger';
 import { useRecentlyViewed, getRecentlyViewed } from '../hooks/useRecentlyViewed';
 import { getComplements } from '../utils/complementMap';
+import { formatPrice } from '../utils/format';
+import { CATEGORY_LABEL } from '../utils/categories';
 import type { Product } from '../types';
 
-const CATEGORY_LABELS = {
-  vestido:  'Vestidos & Saias',
-  camiseta: 'Blusas & Tops',
-  calça:    'Calças',
-  conjunto: 'Conjuntos',
-  jaqueta:  'Jaquetas & Casacos',
-};
-
 function MiniCard({ product }: { product: Product }) {
-  const [imgError, setImgError]   = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
-
   return (
     <Link to={`/produto/${product.id}`} className="group stagger-item block">
       <div className="relative aspect-[3/4] bg-surface2 overflow-hidden mb-3">
-        {product.image_url && !imgError ? (
-          <>
-            {!imgLoaded && <div className="absolute inset-0 skeleton" />}
-            <img
-              src={product.image_url}
-              alt={product.name}
-              loading="lazy"
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgError(true)}
-              className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 img-reveal ${imgLoaded ? 'loaded' : ''}`}
-            />
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-surface2">
-            <span className="font-display text-4xl font-light text-gold/20">{product.name.charAt(0)}</span>
-          </div>
-        )}
+        <ProductImage
+          src={product.image_url}
+          alt={product.name}
+          fallbackLetter={product.name.charAt(0)}
+          className="transition-transform duration-700 group-hover:scale-105"
+        />
         {product.tag && (
           <span className="absolute top-2 left-2 text-[10px] font-body tracking-widest uppercase bg-bg border border-gold/40 text-gold px-2 py-0.5">
             {product.tag}
@@ -52,7 +33,7 @@ function MiniCard({ product }: { product: Product }) {
         </div>
       </div>
       <p className="font-display text-sm font-light text-cream leading-snug line-clamp-2">{product.name}</p>
-      <p className="font-body text-xs font-light text-gold mt-0.5">R$ {product.price.toFixed(2).replace('.', ',')}</p>
+      <p className="font-body text-xs font-light text-gold mt-0.5">{formatPrice(product.price)}</p>
     </Link>
   );
 }
@@ -80,21 +61,17 @@ export default function ProdutoPage() {
   const navigate = useNavigate();
   const { addItem } = useCart();
 
-  const [product, setProduct]     = useState<Product | null>(null);
-  const [allProducts, setAll]     = useState<Product[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState('');
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError]   = useState(false);
-  const [selectedSize, setSize]   = useState<import('../types').ProductSize | ''>('');
-  const [added, setAdded]         = useState(false);
+  const [product, setProduct]   = useState<Product | null>(null);
+  const [allProducts, setAll]   = useState<Product[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState('');
+  const [selectedSize, setSize] = useState<import('../types').ProductSize | ''>('');
+  const [added, setAdded]       = useState(false);
 
   useRecentlyViewed(product);
 
   useEffect(() => {
     setLoading(true);
-    setImgLoaded(false);
-    setImgError(false);
     setSize('');
 
     Promise.all([getProduct(id!), getProducts()])
@@ -178,22 +155,11 @@ export default function ProdutoPage() {
 
           <div className="md:sticky md:top-24">
             <div className="relative aspect-[3/4] bg-surface2 overflow-hidden">
-              {product.image_url && !imgError ? (
-                <>
-                  {!imgLoaded && <div className="absolute inset-0 skeleton" />}
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    onLoad={() => setImgLoaded(true)}
-                    onError={() => setImgError(true)}
-                    className={`w-full h-full object-cover img-reveal ${imgLoaded ? 'loaded' : ''}`}
-                  />
-                </>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="font-display text-8xl font-light text-gold/20">{product.name.charAt(0)}</span>
-                </div>
-              )}
+              <ProductImage
+                src={product.image_url}
+                alt={product.name}
+                fallbackLetter={product.name.charAt(0)}
+              />
               {product.tag && (
                 <span className="absolute top-4 left-4 text-xs font-body font-light tracking-widest uppercase bg-bg border border-gold/40 text-gold px-3 py-1">
                   {product.tag}
@@ -205,13 +171,13 @@ export default function ProdutoPage() {
           <div className="space-y-6">
             <div>
               <p className="font-body text-xs font-light tracking-widest uppercase text-gold mb-2">
-                {CATEGORY_LABELS[product.category] || product.category}
+                {CATEGORY_LABEL[product.category] || product.category}
               </p>
               <h1 className="font-display text-3xl md:text-4xl font-light text-cream leading-tight">
                 {product.name}
               </h1>
               <p className="font-display text-2xl font-light text-gold mt-3">
-                R$ {product.price.toFixed(2).replace('.', ',')}
+                {formatPrice(product.price)}
               </p>
             </div>
 

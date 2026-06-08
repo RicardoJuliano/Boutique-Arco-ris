@@ -1,16 +1,3 @@
-/**
- * data/catalog.js
- * Catálogo estático de produtos da Boutique Arco-Íris.
- * Em produção, substituir por queries ao banco de dados com paginação.
- *
- * Como adicionar um produto:
- *   1. Copie um item existente
- *   2. Atribua um id único (seguindo a sequência)
- *   3. Preencha todos os campos obrigatórios
- *   4. Garanta que style, colors, occasions usam EXATAMENTE os valores
- *      listados nos enums do quizValidator.js (em minúsculas)
- */
-
 const CATALOG = [
   {
     id: 1,

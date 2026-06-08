@@ -7,7 +7,7 @@ Aplicação web fullstack de portfólio que combina um e-commerce de moda comple
 ## ✨ Funcionalidades
 
 ### Para o cliente
-- **Catálogo de produtos** com filtros por categoria, estilo, ocasião e faixa de preço
+- **Catálogo de produtos** com filtros por categoria e **busca por nome/descrição** via URL (`?q=`)
 - **Página individual de produto** com galeria de imagens, variações de tamanho e histórico de produtos vistos recentemente
 - **Consultora de estilo por IA** — quiz de 6 perguntas → análise do perfil → 3 recomendações personalizadas com justificativas
 - **Histórico de consultorias** — todas as sessões anteriores com data e produtos recomendados
@@ -19,7 +19,8 @@ Aplicação web fullstack de portfólio que combina um e-commerce de moda comple
 
 ### Para o administrador
 - **Painel admin** protegido por role (`is_admin`) com middleware dedicado
-- **CRUD completo de produtos** — criar, editar, ativar/desativar, com upload de imagem via Cloudinary
+- **CRUD completo de produtos** — criar, editar, ativar/desativar, upload de imagem via Cloudinary ou URL externa
+- **Leitor de código de barras** via câmera para preenchimento automático do campo SKU/barcode
 - **Gestão de estoque** com controle transacional e guard contra race condition
 
 ---
@@ -112,12 +113,17 @@ boutique-arco-iris/
         ├── components/
         │   ├── PrivateRoute.tsx     # Redireciona para /login se não autenticado
         │   ├── AdminRoute.tsx       # Redireciona se não for admin
-        │   ├── Navbar.tsx
+        │   ├── Navbar.tsx           # Busca inline expansível + ícone de carrinho com badge
         │   ├── Footer.tsx
-        │   └── ProductCard.tsx
+        │   ├── ProductCard.tsx
+        │   ├── ProductImage.tsx     # Imagem com skeleton + fallback (letra inicial)
+        │   ├── Spinner.tsx          # Spinner de loading reutilizável
+        │   └── BarcodeScanner.tsx   # Leitor de código de barras via câmera (@zxing/browser)
         ├── services/
         │   └── api.ts               # fetch centralizado com credentials: 'include'
         ├── utils/
+        │   ├── format.ts            # formatPrice(), toErrorMessage()
+        │   ├── categories.ts        # CATEGORIES[], CATEGORY_LABEL (fonte única de verdade)
         │   └── complementMap.ts     # Mapeia categorias a produtos complementares ("Complete o Look")
         └── pages/
             ├── HomePage.tsx
@@ -276,7 +282,13 @@ O frontend sobe em `http://localhost:5173`.
 
 ### 4. Criar conta admin (opcional)
 
-Para acessar o painel admin, promova um usuário diretamente no banco após cadastro:
+Defina `ADMIN_EMAIL` no `.env` — o backend promove automaticamente o usuário na inicialização:
+
+```env
+ADMIN_EMAIL=seu@email.com
+```
+
+Ou promova manualmente via banco:
 
 ```bash
 cd backend

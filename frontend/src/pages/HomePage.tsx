@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../types';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ProductImage from '../components/ProductImage';
 import { useAuth } from '../hooks/useAuth';
 import { getProducts } from '../services/api';
 import { useStagger } from '../hooks/useStagger';
+import { formatPrice } from '../utils/format';
 
 const TESTIMONIALS = [
   {
@@ -62,17 +64,19 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero — Ken Burns no background */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden min-h-[480px] md:min-h-[560px]">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat ken-burns"
+          className="absolute inset-0 bg-cover bg-no-repeat ken-burns"
           style={{
-            backgroundImage:
-              'url(https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=80)',
+            backgroundImage: 'url(/hero.jpg)',
+            backgroundSize: '135%',
+            backgroundPosition: 'center 45%',
+            filter: 'contrast(1.12) saturate(1.1) brightness(1.03)',
           }}
         />
-        <div className="absolute inset-0 bg-black/25" />
-        <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/80 to-bg/30" />
-        <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-40">
+        <div className="absolute inset-0 bg-black/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/40 to-transparent" />
+        <div className="relative max-w-6xl mx-auto px-6 py-14 md:py-20">
           <p className="hero-line hero-line-1 hero-eyebrow">Loja Multimarcas — Buenópolis, MG</p>
           <h1 className="hero-line hero-line-2 font-display text-5xl md:text-7xl font-light text-cream leading-tight mb-4 max-w-xl">
             A luz mais brilhante
@@ -209,29 +213,15 @@ export default function HomePage() {
 
 interface FeaturedCardProps { product: Product }
 function FeaturedCard({ product }: FeaturedCardProps) {
-  const [imgError, setImgError] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
-
   return (
     <Link to={`/produto/${product.id}`} className="group stagger-item block">
       <div className="relative aspect-[3/4] bg-surface2 overflow-hidden mb-3">
-        {product.image_url && !imgError ? (
-          <>
-            {!imgLoaded && <div className="absolute inset-0 skeleton" />}
-            <img
-              src={product.image_url}
-              alt={product.name}
-              loading="lazy"
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgError(true)}
-              className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 img-reveal ${imgLoaded ? 'loaded' : ''}`}
-            />
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="font-display text-4xl font-light text-gold/20">{product.name.charAt(0)}</span>
-          </div>
-        )}
+        <ProductImage
+          src={product.image_url}
+          alt={product.name}
+          fallbackLetter={product.name.charAt(0)}
+          className="transition-transform duration-700 group-hover:scale-105"
+        />
         {product.tag && (
           <span className="absolute top-2 right-2 text-[10px] font-body tracking-widest uppercase bg-bg border border-gold/40 text-gold px-2 py-0.5">
             {product.tag}
@@ -253,9 +243,7 @@ function FeaturedCard({ product }: FeaturedCardProps) {
         </div>
       </div>
       <p className="font-display text-base font-light text-cream leading-snug group-hover:text-gold transition-colors duration-200">{product.name}</p>
-      <p className="font-body text-sm font-light text-gold mt-0.5">
-        R$ {product.price.toFixed(2).replace('.', ',')}
-      </p>
+      <p className="font-body text-sm font-light text-gold mt-0.5">{formatPrice(product.price)}</p>
     </Link>
   );
 }

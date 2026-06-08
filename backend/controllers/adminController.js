@@ -14,8 +14,10 @@ const productSchema = z.object({
   stock:       z.number().int().min(0).max(9999),
   description: z.string().max(2000).optional().default(''),
   tag:         z.string().max(50).optional().nullable(),
-  // image_url deve ser URL https ou string vazia — nunca javascript:
-  image_url:   z.string().url().startsWith('https://').max(500).optional().or(z.literal('')),
+  // imageUrl deve ser URL https ou string vazia — nunca javascript:
+  imageUrl:    z.string().url().startsWith('https://').max(500).optional().or(z.literal('')),
+  barcode:     z.string().max(100).optional().nullable(),
+  active:      z.boolean().optional(),
   style:       z.array(z.string().max(50)).max(20).optional().default([]),
   colors:      z.array(z.string().max(50)).max(20).optional().default([]),
   occasions:   z.array(z.string().max(50)).max(20).optional().default([]),

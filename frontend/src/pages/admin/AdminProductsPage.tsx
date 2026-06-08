@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { adminListProducts, adminDeleteProduct } from '../../services/api';
 import Navbar from '../../components/Navbar';
+import Spinner from '../../components/Spinner';
+import { toErrorMessage, formatPrice } from '../../utils/format';
 import type { Product } from '../../types';
 
 export default function AdminProductsPage() {
@@ -18,7 +20,7 @@ export default function AdminProductsPage() {
       const { products } = await adminListProducts();
       setProducts(products);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro');
+      setError(toErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -30,7 +32,7 @@ export default function AdminProductsPage() {
       await adminDeleteProduct(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Erro');
+      alert(toErrorMessage(e));
     }
   }
 
@@ -53,7 +55,7 @@ export default function AdminProductsPage() {
 
           {loading ? (
             <div className="flex justify-center py-20">
-              <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+              <Spinner />
             </div>
           ) : products.length === 0 ? (
             <p className="font-body text-muted text-center py-20">Nenhum produto cadastrado.</p>
@@ -86,7 +88,7 @@ export default function AdminProductsPage() {
                       <td className="py-3 pr-4 text-cream">{p.name}</td>
                       <td className="py-3 pr-4 text-muted">{p.category}</td>
                       <td className="py-3 pr-4 text-cream">
-                        {Number(p.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        {formatPrice(p.price)}
                       </td>
                       <td className="py-3 pr-4 text-cream">{p.stock}</td>
                       <td className="py-3 pr-4">

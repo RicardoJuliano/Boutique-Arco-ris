@@ -25,6 +25,7 @@ export interface Product {
   desc: string;
   tag?: string;
   image_url?: string;
+  barcode?: string | null;
   stock: number;
   active: boolean;
   created_at: string;
@@ -138,6 +139,7 @@ export interface ProductPayload {
   sizes: string[];
   description?: string;
   tag?: string | null;
+  barcode?: string | null;
   stock: number;
   active?: boolean;
   imageUrl?: string;

@@ -32,21 +32,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
 
           <div className="flex flex-col items-center gap-3">
-            <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-sm">
-              <div className="absolute inset-0" style={{
-                background: 'linear-gradient(138deg, #EDE3D9 50%, #D4C4B5 50%)'
-              }} />
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <span className="font-script text-[1.9rem] leading-[1.1] select-none"
-                  style={{ color: '#3D2B1F' }}>
-                  Arco-Íris
-                </span>
-                <span className="font-cormorant text-[0.44rem] font-light tracking-[0.5em] uppercase select-none mt-0.5"
-                  style={{ color: '#6B4C38' }}>
-                  Boutique
-                </span>
-              </div>
-            </div>
+            <img src="/logo.png" alt="Boutique Arco-Íris" className="h-16 w-auto object-contain opacity-80" />
             <p className="font-cormorant text-xs font-light text-muted/70 tracking-[0.2em] uppercase">
               Buenópolis, MG
             </p>
