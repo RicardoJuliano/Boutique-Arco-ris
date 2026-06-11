@@ -1,6 +1,20 @@
 const db = require('../config/database');
 
-function parse(row) {
+function fetchImages(productIds) {
+  if (!productIds.length) return {};
+  const placeholders = productIds.map(() => '?').join(',');
+  const rows = db.prepare(
+    `SELECT id, product_id, url, position FROM product_images WHERE product_id IN (${placeholders}) ORDER BY product_id, position`
+  ).all(...productIds);
+  const map = {};
+  for (const row of rows) {
+    if (!map[row.product_id]) map[row.product_id] = [];
+    map[row.product_id].push({ id: row.id, url: row.url, position: row.position });
+  }
+  return map;
+}
+
+function parse(row, images = []) {
   if (!row) return null;
   return {
     id: row.id,
@@ -17,19 +31,27 @@ function parse(row) {
     barcode: row.barcode || null,
     stock: row.stock,
     active: row.active === 1,
+    images,
   };
 }
 
 exports.findAll = function findAll() {
-  return db.prepare('SELECT * FROM products ORDER BY id').all().map(parse);
+  const rows = db.prepare('SELECT * FROM products ORDER BY id').all();
+  const imageMap = fetchImages(rows.map((r) => r.id));
+  return rows.map((row) => parse(row, imageMap[row.id] || []));
 };
 
 exports.findActive = function findActive() {
-  return db.prepare('SELECT * FROM products WHERE active = 1 ORDER BY id').all().map(parse);
+  const rows = db.prepare('SELECT * FROM products WHERE active = 1 ORDER BY id').all();
+  const imageMap = fetchImages(rows.map((r) => r.id));
+  return rows.map((row) => parse(row, imageMap[row.id] || []));
 };
 
 exports.findById = function findById(id) {
-  return parse(db.prepare('SELECT * FROM products WHERE id = ?').get(id));
+  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  if (!row) return null;
+  const imageMap = fetchImages([id]);
+  return parse(row, imageMap[id] || []);
 };
 
 exports.create = function create({ name, price, category, style, colors, occasions, sizes, description, tag, imageUrl, barcode, stock }) {
@@ -70,4 +92,17 @@ exports.update = function update(id, fields) {
 
 exports.remove = function remove(id) {
   db.prepare('DELETE FROM products WHERE id = ?').run(id);
+};
+
+exports.addImage = function addImage(productId, url) {
+  const row = db.prepare('SELECT COUNT(*) as cnt FROM product_images WHERE product_id = ?').get(productId);
+  const position = row.cnt;
+  const result = db.prepare(
+    'INSERT INTO product_images (product_id, url, position) VALUES (?, ?, ?)'
+  ).run(productId, url, position);
+  return { id: Number(result.lastInsertRowid), url, position };
+};
+
+exports.removeImage = function removeImage(imageId, productId) {
+  db.prepare('DELETE FROM product_images WHERE id = ? AND product_id = ?').run(imageId, productId);
 };

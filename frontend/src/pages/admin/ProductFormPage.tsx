@@ -5,12 +5,15 @@ import {
   adminCreateProduct,
   adminUpdateProduct,
   adminUploadImage,
+  adminAddProductImage,
+  adminDeleteProductImage,
 } from '../../services/api';
 import Navbar from '../../components/Navbar';
 import Spinner from '../../components/Spinner';
 import BarcodeScanner from '../../components/BarcodeScanner';
 import { CATEGORIES } from '../../utils/categories';
 import { toErrorMessage } from '../../utils/format';
+import type { ProductImage } from '../../types';
 
 
 const ARRAY_FIELDS = [
@@ -50,7 +53,10 @@ export default function ProductFormPage() {
   const [error, setError]           = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const [imageMode, setImageMode]   = useState<'upload' | 'url'>('upload');
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [extraImages, setExtraImages]     = useState<ProductImage[]>([]);
+  const [uploadingExtra, setUploadingExtra] = useState(false);
+  const fileRef      = useRef<HTMLInputElement>(null);
+  const extraFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isEdit || !id) return;
@@ -72,6 +78,7 @@ export default function ProductFormPage() {
         });
         setImageUrl(product.image_url || '');
         setImagePreview(product.image_url || '');
+        setExtraImages(product.images ?? []);
       })
       .catch((e) => setError(toErrorMessage(e)))
       .finally(() => setLoading(false));
@@ -106,6 +113,31 @@ export default function ProductFormPage() {
       throw new Error('Erro no upload: ' + toErrorMessage(e));
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleExtraUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+    setUploadingExtra(true);
+    try {
+      const data = await adminAddProductImage(id, file);
+      setExtraImages((prev) => [...prev, data.image]);
+    } catch (e) {
+      setError(toErrorMessage(e));
+    } finally {
+      setUploadingExtra(false);
+      if (extraFileRef.current) extraFileRef.current.value = '';
+    }
+  }
+
+  async function handleDeleteExtra(imageId: number) {
+    if (!id) return;
+    try {
+      await adminDeleteProductImage(id, imageId);
+      setExtraImages((prev) => prev.filter((img) => img.id !== imageId));
+    } catch (e) {
+      setError(toErrorMessage(e));
     }
   }
 
@@ -369,6 +401,52 @@ export default function ProductFormPage() {
                 </div>
               )}
             </div>
+
+            {isEdit && (
+              <div>
+                <label className="field-label">
+                  Fotos adicionais{' '}
+                  <span className="normal-case text-muted/60">(máx. 4, além da foto principal)</span>
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {extraImages.map((img) => (
+                    <div key={img.id} className="relative w-20 h-20">
+                      <img src={img.url} alt="" className="w-full h-full object-cover border border-border" />
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteExtra(img.id)}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-bg border border-border text-muted hover:text-cream text-[10px] flex items-center justify-center"
+                        aria-label="Remover foto"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  {extraImages.length < 4 && (
+                    <>
+                      <input
+                        ref={extraFileRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleExtraUpload}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => extraFileRef.current?.click()}
+                        disabled={uploadingExtra}
+                        className="w-20 h-20 border border-dashed border-border text-muted hover:border-gold hover:text-gold transition-colors flex flex-col items-center justify-center gap-1 text-xs font-body"
+                      >
+                        {uploadingExtra
+                          ? <Spinner className="w-5 h-5" />
+                          : <><span className="text-xl leading-none">+</span><span>Adicionar</span></>
+                        }
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-4 pt-4">
               <button

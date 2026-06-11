@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getHistory } from '../services/api';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
+import Spinner from '../components/Spinner';
 import type { HistoryEntry, Recommendation } from '../types';
 
 export default function HistoryPage() {
@@ -23,7 +24,7 @@ export default function HistoryPage() {
       <div className="min-h-screen bg-bg">
         <Navbar />
         <div className="flex justify-center pt-20">
-          <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+          <Spinner />
         </div>
       </div>
     );

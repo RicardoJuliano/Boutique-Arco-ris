@@ -13,6 +13,12 @@ export type ProductOccasion  = 'trabalho' | 'festa' | 'casual' | 'passeio' | 'es
 export type ProductCategory  = 'camiseta' | 'calça' | 'vestido' | 'jaqueta' | 'conjunto';
 export type ProductSize      = 'PP' | 'P' | 'M' | 'G' | 'GG' | 'XG' | '34' | '36' | '38' | '40' | '42' | '44' | '46' | 'U';
 
+export interface ProductImage {
+  id: number;
+  url: string;
+  position: number;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -28,6 +34,7 @@ export interface Product {
   barcode?: string | null;
   stock: number;
   active: boolean;
+  images?: ProductImage[];
   created_at: string;
   updated_at: string;
 }

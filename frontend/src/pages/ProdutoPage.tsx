@@ -61,18 +61,20 @@ export default function ProdutoPage() {
   const navigate = useNavigate();
   const { addItem } = useCart();
 
-  const [product, setProduct]   = useState<Product | null>(null);
-  const [allProducts, setAll]   = useState<Product[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState('');
-  const [selectedSize, setSize] = useState<import('../types').ProductSize | ''>('');
-  const [added, setAdded]       = useState(false);
+  const [product, setProduct]         = useState<Product | null>(null);
+  const [allProducts, setAll]         = useState<Product[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState('');
+  const [selectedSize, setSize]       = useState<import('../types').ProductSize | ''>('');
+  const [added, setAdded]             = useState(false);
+  const [activeImage, setActiveImage] = useState<string | undefined>(undefined);
 
   useRecentlyViewed(product);
 
   useEffect(() => {
     setLoading(true);
     setSize('');
+    setActiveImage(undefined);
 
     Promise.all([getProduct(id!), getProducts()])
       .then(([{ product: p }, { products: all }]) => {
@@ -122,6 +124,12 @@ export default function ProdutoPage() {
     );
   }
 
+  const galleryImages = [
+    ...(product.image_url ? [{ id: 0, url: product.image_url }] : []),
+    ...(product.images ?? []),
+  ];
+  const currentImage = activeImage ?? product.image_url;
+
   const complements   = getComplements(product.category, allProducts, product.id);
   const recentlyViewed = getRecentlyViewed(product.id)
     .map((rv) => allProducts.find((p) => p.id === rv.id) || rv)
@@ -156,7 +164,7 @@ export default function ProdutoPage() {
           <div className="md:sticky md:top-24">
             <div className="relative aspect-[3/4] bg-surface2 overflow-hidden">
               <ProductImage
-                src={product.image_url}
+                src={currentImage}
                 alt={product.name}
                 fallbackLetter={product.name.charAt(0)}
               />
@@ -166,6 +174,23 @@ export default function ProdutoPage() {
                 </span>
               )}
             </div>
+
+            {galleryImages.length > 1 && (
+              <div className="flex gap-2 mt-3 flex-wrap">
+                {galleryImages.map((img) => (
+                  <button
+                    key={img.id}
+                    type="button"
+                    onClick={() => setActiveImage(img.url)}
+                    className={`relative w-16 aspect-square overflow-hidden border transition-colors duration-200
+                      ${currentImage === img.url ? 'border-gold' : 'border-border hover:border-gold/50'}`}
+                    aria-label="Ver foto"
+                  >
+                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-6">

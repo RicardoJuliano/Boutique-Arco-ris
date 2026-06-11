@@ -101,23 +101,56 @@ exports.deleteProduct = function deleteProduct(req, res, next) {
   }
 };
 
+async function uploadToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'boutique-arco-iris', transformation: [{ width: 800, crop: 'limit' }] },
+      (err, result) => (err ? reject(err) : resolve(result))
+    );
+    stream.end(buffer);
+  });
+}
+
 exports.uploadImage = async function uploadImage(req, res, next) {
   try {
     if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
 
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'boutique-arco-iris', transformation: [{ width: 800, crop: 'limit' }] },
-        (err, result) => (err ? reject(err) : resolve(result))
-      );
-      stream.end(req.file.buffer);
-    });
+    const result = await uploadToCloudinary(req.file.buffer);
 
     if (req.body.productId) {
       productRepository.update(Number(req.body.productId), { imageUrl: result.secure_url });
     }
 
     res.json({ url: result.secure_url });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.uploadExtraImage = async function uploadExtraImage(req, res, next) {
+  try {
+    const productId = Number(req.params.id);
+    if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
+
+    const product = productRepository.findById(productId);
+    if (!product) return res.status(404).json({ error: 'Produto não encontrado' });
+
+    if ((product.images?.length ?? 0) >= 4) {
+      return res.status(400).json({ error: 'Máximo de 4 fotos adicionais atingido' });
+    }
+
+    const result = await uploadToCloudinary(req.file.buffer);
+    const image = productRepository.addImage(productId, result.secure_url);
+    res.status(201).json({ image });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteExtraImage = function deleteExtraImage(req, res, next) {
+  try {
+    productRepository.removeImage(Number(req.params.imageId), Number(req.params.id));
+    res.json({ message: 'Imagem removida' });
   } catch (err) {
     next(err);
   }

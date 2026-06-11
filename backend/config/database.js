@@ -29,6 +29,17 @@ try {
   db.exec('ALTER TABLE products ADD COLUMN barcode TEXT');
 } catch (_) {}
 
+// Tabela de fotos adicionais do produto
+db.exec(`
+  CREATE TABLE IF NOT EXISTS product_images (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    url        TEXT    NOT NULL,
+    position   INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+  )
+`);
+
 // Garante que ADMIN_EMAIL sempre seja admin — evita ficar bloqueado após reset de banco
 if (process.env.ADMIN_EMAIL) {
   db.prepare('UPDATE users SET is_admin = 1 WHERE email = ? AND is_admin = 0').run(process.env.ADMIN_EMAIL);

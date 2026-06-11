@@ -1,5 +1,5 @@
-export default function Spinner() {
+export default function Spinner({ className = 'w-8 h-8' }: { className?: string }) {
   return (
-    <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+    <div className={`${className} border-2 border-gold border-t-transparent rounded-full animate-spin`} />
   );
 }

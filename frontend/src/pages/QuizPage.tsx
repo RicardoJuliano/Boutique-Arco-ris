@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRecommendations } from '../services/api';
 import Navbar from '../components/Navbar';
+import Spinner from '../components/Spinner';
 import type { QuizAnswers } from '../types';
 
 const QUESTIONS = [
@@ -109,7 +110,7 @@ export default function QuizPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-bg flex flex-col items-center justify-center gap-6">
-        <div className="w-10 h-10 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+        <Spinner className="w-10 h-10" />
         <p className="font-body text-sm font-light text-muted tracking-widest">
           A consultora está analisando seu perfil...
         </p>

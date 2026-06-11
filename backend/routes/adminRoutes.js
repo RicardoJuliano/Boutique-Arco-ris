@@ -24,5 +24,7 @@ router.post('/products', adminController.createProduct);
 router.put('/products/:id', adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 router.post('/products/upload', upload.single('image'), adminController.uploadImage);
+router.post('/products/:id/images', upload.single('image'), adminController.uploadExtraImage);
+router.delete('/products/:id/images/:imageId', adminController.deleteExtraImage);
 
 module.exports = router;

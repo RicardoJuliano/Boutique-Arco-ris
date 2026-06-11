@@ -130,7 +130,7 @@ export default function HomePage() {
       {/* Como Funciona */}
       <section className="border-t border-border bg-surface">
         <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
-          <p className="section-eyebrow">Como Funciona</p>
+          <p className="section-eyebrow">Como funciona a nossa consultoria</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
             {[
               {

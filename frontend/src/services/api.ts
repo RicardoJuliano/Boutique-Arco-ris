@@ -107,6 +107,26 @@ export const adminUploadImage = (file: File, productId?: number | string) => {
   });
 };
 
+export const adminAddProductImage = (productId: number | string, file: File) => {
+  const form = new FormData();
+  form.append('image', file);
+
+  return fetch(`${BASE}/admin/products/${productId}/images`, {
+    method: 'POST',
+    credentials: 'include',
+    body: form,
+  }).then(async (res) => {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Erro no upload' }));
+      throw new Error(err.error || 'Erro no upload');
+    }
+    return res.json() as Promise<{ image: { id: number; url: string; position: number } }>;
+  });
+};
+
+export const adminDeleteProductImage = (productId: number | string, imageId: number) =>
+  request<{ message: string }>(`/admin/products/${productId}/images/${imageId}`, { method: 'DELETE' });
+
 export const getFreight = (cep: string, items = 1) =>
   request<FreightResponse>(`/freight?cep=${String(cep).replace(/\D/g, '')}&items=${items}`);
 

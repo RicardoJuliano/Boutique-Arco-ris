@@ -46,6 +46,7 @@ export default function CheckoutPage() {
     if (digits.length !== 8) {
       setFreightOptions(null);
       setCepError('');
+      setAddress((prev) => ({ ...prev, street: '', district: '', city: '', state: '', zip: '' }));
       return;
     }
 
