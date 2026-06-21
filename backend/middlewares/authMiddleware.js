@@ -20,6 +20,7 @@ module.exports = async function authMiddleware(req, res, next) {
       id: user.id,
       name: user.name,
       email: user.email,
+      cpf: user.cpf ?? null,
       isAdmin: user.is_admin === 1,
     };
     next();

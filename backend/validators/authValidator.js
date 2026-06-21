@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { isValidCPF } = require('../utils/cpfValidator');
 
 exports.registerSchema = z.object({
   name: z
@@ -11,6 +12,12 @@ exports.registerSchema = z.object({
     .string({ required_error: 'Email é obrigatório' })
     .email('Email inválido')
     .toLowerCase(),
+
+  cpf: z
+    .string({ required_error: 'CPF é obrigatório' })
+    .transform((val) => val.replace(/\D/g, ''))
+    .refine((val) => val.length === 11, 'CPF inválido')
+    .refine((val) => isValidCPF(val), 'CPF inválido'),
 
   // max 72: bcrypt trunca senhas maiores silenciosamente, causando falhas inesperadas no login
   password: z

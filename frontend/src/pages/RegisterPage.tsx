@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register as apiRegister } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import { isValidCPF, maskCPF } from '../utils/cpf';
 import Navbar from '../components/Navbar';
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ name: '', email: '', cpf: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string[] | string | undefined>>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,13 +20,39 @@ export default function RegisterPage() {
     }
   }
 
+  function handleCPFChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const masked = maskCPF(e.target.value);
+    setForm((prev) => ({ ...prev, cpf: masked }));
+
+    const digits = masked.replace(/\D/g, '');
+    if (errors.cpf) {
+      if (isValidCPF(digits)) setErrors((prev) => ({ ...prev, cpf: undefined }));
+    } else if (digits.length === 11 && !isValidCPF(digits)) {
+      setErrors((prev) => ({ ...prev, cpf: ['CPF inválido'] }));
+    }
+  }
+
+  function handleCPFBlur() {
+    const digits = form.cpf.replace(/\D/g, '');
+    if (digits.length > 0 && !isValidCPF(digits)) {
+      setErrors((prev) => ({ ...prev, cpf: ['CPF inválido'] }));
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
 
+    const rawCPF = form.cpf.replace(/\D/g, '');
+    if (!isValidCPF(rawCPF)) {
+      setErrors({ cpf: ['CPF inválido'] });
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const { user } = await apiRegister(form.name, form.email, form.password);
+      const { user } = await apiRegister(form.name, form.email, form.cpf, form.password);
       login(user);
       navigate('/quiz');
     } catch (err) {
@@ -84,6 +111,26 @@ export default function RegisterPage() {
             />
             {errors.email && (
               <p className="text-red-400/80 text-xs font-body font-light mt-1">{errors.email[0]}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="field-label">CPF</label>
+            <input
+              type="text"
+              name="cpf"
+              value={form.cpf}
+              onChange={handleCPFChange}
+              onBlur={handleCPFBlur}
+              required
+              inputMode="numeric"
+              maxLength={14}
+              autoComplete="off"
+              className="field-input"
+              placeholder="000.000.000-00"
+            />
+            {errors.cpf && (
+              <p className="text-red-400/80 text-xs font-body font-light mt-1">{errors.cpf[0]}</p>
             )}
           </div>
 

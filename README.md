@@ -15,13 +15,16 @@ Aplicação web fullstack de portfólio que combina um e-commerce de moda comple
 - **Checkout completo** com endereço de entrega, escolha de método de envio (PAC/SEDEX) e forma de pagamento (cartão/PIX)
 - **Cálculo de frete em tempo real** via endpoint dedicado
 - **Confirmação de pedido** com resumo e número do pedido
-- **Autenticação completa** — cadastro, login, logout e sessão persistente via cookie HttpOnly
+- **Autenticação completa** — cadastro com CPF validado, login, logout e sessão persistente via cookie HttpOnly
+- **CPF com validação de dígitos verificadores** — máscara automática `000.000.000-00`, validação em tempo real e unicidade no banco
+- **Páginas legais** — Política de Privacidade (LGPD), Trocas e Devoluções (CDC) e Termos de Uso acessíveis pelo footer
 
 ### Para o administrador
 - **Painel admin** protegido por role (`is_admin`) com middleware dedicado
 - **CRUD completo de produtos** — criar, editar, ativar/desativar, upload de imagem via Cloudinary ou URL externa
 - **Leitor de código de barras** via câmera para preenchimento automático do campo SKU/barcode
 - **Gestão de estoque** com controle transacional e guard contra race condition
+- **Notificação de pedidos por e-mail** — a cada novo pedido o lojista recebe e-mail HTML com dados do cliente, itens, endereço, frete e forma de pagamento
 
 ---
 
@@ -47,6 +50,7 @@ Aplicação web fullstack de portfólio que combina um e-commerce de moda comple
 | Helmet.js | 7 | Headers HTTP de segurança automáticos (CSP, HSTS, X-Frame-Options...) |
 | express-rate-limit | 7 | Proteção contra brute force no login e abuso da API Anthropic |
 | Cloudinary + multer | — | Upload e hospedagem de imagens de produtos no painel admin |
+| nodemailer | — | E-mail HTML de notificação de novos pedidos via Gmail SMTP (App Password) |
 | dotenv | 16 | Separação de secrets do código-fonte |
 
 ### IA
@@ -64,24 +68,24 @@ boutique-arco-iris/
 ├── backend/
 │   ├── server.js                    # Entry point — Express + middlewares na ordem correta
 │   ├── config/
-│   │   ├── database.js              # SQLite, WAL mode, FK, criação de tabelas, seed
+│   │   ├── database.js              # SQLite, WAL mode, FK, criação de tabelas, seed, migração CPF
 │   │   └── cloudinary.js            # Config Cloudinary para upload de imagens
 │   ├── data/
 │   │   └── catalog.js               # Seed inicial de produtos
 │   ├── validators/
-│   │   ├── authValidator.js         # Zod schemas para cadastro e login
+│   │   ├── authValidator.js         # Zod schemas para cadastro (CPF + normalização) e login
 │   │   └── quizValidator.js         # Zod schemas para respostas do quiz (enums estritos)
 │   ├── repositories/                # Única camada que toca o banco — queries parametrizadas
-│   │   ├── userRepository.js
+│   │   ├── userRepository.js        # findByCPF(), create() com cpf
 │   │   ├── productRepository.js
 │   │   ├── recommendationRepository.js
 │   │   └── orderRepository.js
 │   ├── services/                    # Regras de negócio puras (sem req/res)
-│   │   ├── authService.js
+│   │   ├── authService.js           # Unicidade de CPF na criação de conta
 │   │   ├── recommendationService.js # Filtro do catálogo + chamada Anthropic + validação Zod
-│   │   └── orderService.js          # Transação SQLite com guard de estoque
+│   │   └── orderService.js          # Transação SQLite com guard de estoque, retorna dados para e-mail
 │   ├── middlewares/
-│   │   ├── authMiddleware.js        # Verifica JWT do cookie
+│   │   ├── authMiddleware.js        # Verifica JWT do cookie, inclui cpf no req.user
 │   │   ├── adminMiddleware.js       # Verifica is_admin no payload do JWT
 │   │   ├── csrfMiddleware.js        # Valida header Origin como segunda barreira CSRF
 │   │   ├── rateLimiter.js           # Limites por rota (login, register, recomendações)
@@ -89,8 +93,11 @@ boutique-arco-iris/
 │   ├── controllers/                 # Orquestração: valida → chama service → responde
 │   │   ├── authController.js
 │   │   ├── recommendationController.js
-│   │   ├── orderController.js
+│   │   ├── orderController.js       # Dispara e-mail de notificação (fire-and-forget)
 │   │   └── adminController.js
+│   ├── utils/
+│   │   ├── cpfValidator.js          # Algoritmo de dígitos verificadores do CPF
+│   │   └── mailer.js                # nodemailer + template HTML para e-mail de pedido
 │   └── routes/
 │       ├── authRoutes.js
 │       ├── productRoutes.js
@@ -102,7 +109,7 @@ boutique-arco-iris/
 └── frontend/
     └── src/
         ├── types/
-        │   └── index.ts             # Interfaces e tipos centralizados (Product, Order, Cart...)
+        │   └── index.ts             # Interfaces e tipos centralizados (User com cpf, Product, Order...)
         ├── context/
         │   ├── AuthContext.tsx      # Estado global de autenticação (token no cookie, não no estado)
         │   └── CartContext.tsx      # Carrinho global persistente entre páginas
@@ -114,7 +121,7 @@ boutique-arco-iris/
         │   ├── PrivateRoute.tsx     # Redireciona para /login se não autenticado
         │   ├── AdminRoute.tsx       # Redireciona se não for admin
         │   ├── Navbar.tsx           # Busca inline expansível + ícone de carrinho com badge
-        │   ├── Footer.tsx
+        │   ├── Footer.tsx           # 4 colunas: empresa, contato, informações legais, pagamento
         │   ├── ProductCard.tsx
         │   ├── ProductImage.tsx     # Imagem com skeleton + fallback (letra inicial)
         │   ├── Spinner.tsx          # Spinner de loading reutilizável
@@ -122,6 +129,7 @@ boutique-arco-iris/
         ├── services/
         │   └── api.ts               # fetch centralizado com credentials: 'include'
         ├── utils/
+        │   ├── cpf.ts               # isValidCPF() + maskCPF() para o frontend
         │   ├── format.ts            # formatPrice(), toErrorMessage()
         │   ├── categories.ts        # CATEGORIES[], CATEGORY_LABEL (fonte única de verdade)
         │   └── complementMap.ts     # Mapeia categorias a produtos complementares ("Complete o Look")
@@ -130,15 +138,19 @@ boutique-arco-iris/
             ├── CatalogoPage.tsx
             ├── ProdutoPage.tsx      # Produto individual + recently viewed
             ├── CartPage.tsx
-            ├── CheckoutPage.tsx     # Endereço + frete + pagamento
+            ├── CheckoutPage.tsx     # Endereço + frete + pagamento + botão "Preencher teste"
             ├── OrderConfirmationPage.tsx
             ├── LoginPage.tsx
-            ├── RegisterPage.tsx
+            ├── RegisterPage.tsx     # Campo CPF com máscara e validação em tempo real
             ├── QuizPage.tsx
             ├── ResultsPage.tsx
             ├── HistoryPage.tsx
-            ├── AdminProductsPage.tsx
-            └── ProductFormPage.tsx      # Criar/editar produto com upload de imagem
+            ├── PrivacidadePage.tsx  # Política de Privacidade — LGPD (10 seções)
+            ├── TrocasPage.tsx       # Trocas e Devoluções — CDC Art. 49 e 26 (7 seções)
+            ├── TermosPage.tsx       # Termos de Uso — foro Buenópolis/MG (11 seções)
+            └── admin/
+                ├── AdminProductsPage.tsx
+                └── ProductFormPage.tsx  # Criar/editar produto com upload de imagem
 ```
 
 **Fluxo de uma requisição:**
@@ -148,6 +160,8 @@ Request → Middleware(s) → Controller → Service → Repository → Database
                                     Anthropic API (apenas em /recommendations)
                                           ↓
                                     Cloudinary (apenas em /admin/produtos)
+                                          ↓
+                                    nodemailer → Gmail (apenas em POST /orders)
 ```
 
 ---
@@ -162,7 +176,7 @@ Request → Middleware(s) → Controller → Service → Repository → Database
 | **Rate limiting por rota** | `express-rate-limit` | Anti brute-force no login, anti-spam no cadastro, anti-abuso na IA |
 | **Helmet.js** | `app.use(helmet())` | CSP, HSTS, X-Frame-Options, X-Content-Type-Options automáticos |
 | **CORS restrito** | `origin: process.env.FRONTEND_URL` | Apenas o frontend autorizado pode chamar a API |
-| **Zod em inputs** | Enums estritos no quiz | Bloqueia prompt injection — nenhum texto livre do usuário chega à IA |
+| **Zod em inputs** | Enums estritos no quiz; normalização + dígitos verificadores no CPF | Bloqueia prompt injection e entradas malformadas |
 | **Zod em outputs** | Schema no retorno da IA | Nunca confiar cegamente no output — IDs validados contra o catálogo real |
 | **Queries parametrizadas** | `db.prepare('WHERE id = ?').get(id)` | Impede SQL injection |
 | **bcrypt saltRounds: 12** | `bcrypt.hash(password, 12)` | Força bruta computacionalmente inviável |
@@ -173,6 +187,7 @@ Request → Middleware(s) → Controller → Service → Repository → Database
 | **Role-based access** | `adminMiddleware.js` | Rotas de admin inacessíveis para usuários comuns mesmo com JWT válido |
 | **Secrets no `.env`** | `.env` no `.gitignore` | Chaves da API nunca no repositório |
 | **Payload limit** | `express.json({ limit: '10kb' })` | Reduz superfície de ataque de payloads gigantes |
+| **CPF único com índice parcial** | `CREATE UNIQUE INDEX WHERE cpf IS NOT NULL` | Permite usuários legados (cpf NULL) sem violar unicidade |
 
 > **Por que `node:sqlite` em vez de `better-sqlite3`?**
 > O `better-sqlite3` requer compilação de binários nativos (`node-gyp`), que depende de Python e Visual Studio Build Tools. O `node:sqlite` é embutido no Node.js 22.5+ e oferece a mesma API síncrona sem dependência alguma.
@@ -212,16 +227,40 @@ Adicionar ao carrinho (CartContext global)
   ↓
 Checkout: endereço + método de envio → /api/freight calcula frete real
   ↓
-Submissão → /api/orders
+Submissão → POST /api/orders
   ↓
-orderService.createOrder() inicia transação SQLite:
+orderService.createOrder() executa transação SQLite manual (BEGIN/COMMIT/ROLLBACK):
   - Valida estoque de cada item
   - Decrementa com guard de concorrência
   - Cria pedido + itens
-  - Faz commit (ou rollback automático em erro)
   ↓
-OrderConfirmationPage com resumo e número do pedido
+HTTP 201 enviado ao cliente → OrderConfirmationPage
+  ↓
+Fire-and-forget: nodemailer envia e-mail HTML ao lojista com:
+  dados do cliente (nome, email, CPF formatado, telefone)
+  tabela de itens com quantidades e valores
+  endereço de entrega completo
+  método de envio e pagamento
+  total com frete discriminado
 ```
+
+---
+
+## 📋 Conformidade Legal (e-commerce brasileiro)
+
+O site atende às obrigações do **Decreto 7.962/2013** (e-commerce), **CDC** (Lei 8.078/1990), **LGPD** (Lei 13.709/2018) e **Lei do SAC** (Lei 8.078/1990, Art. 49):
+
+| Obrigação | Implementação |
+|---|---|
+| Identificação do fornecedor | CNPJ, e-mail e horários no footer |
+| Endereço físico | Footer (Av. JK, 502 — Buenópolis/MG) |
+| Direito de arrependimento 7 dias | Menção no footer + Página de Trocas e Devoluções |
+| Política de trocas e defeitos | `/trocas-e-devolucoes` (CDC Art. 26 e 49) |
+| Política de privacidade (LGPD) | `/politica-de-privacidade` com DPO e direitos do titular |
+| Termos de Uso | `/termos-de-uso` (foro: Buenópolis/MG) |
+| Canal de atendimento | WhatsApp, e-mail e horários no footer |
+| Nota Fiscal eletrônica | Menção no footer + Termos de Uso |
+| Link consumidor.gov.br | Footer (link externo) |
 
 ---
 
@@ -231,6 +270,7 @@ OrderConfirmationPage com resumo e número do pedido
 - **Node.js 22.5+** (para o módulo `node:sqlite`)
 - Chave da API da Anthropic — [console.anthropic.com](https://console.anthropic.com)
 - Conta no Cloudinary (para upload de imagens no painel admin) — [cloudinary.com](https://cloudinary.com)
+- Conta Gmail com App Password habilitado (para notificações de pedidos — opcional)
 
 ### 1. Clonar o repositório
 
@@ -261,6 +301,11 @@ ANTHROPIC_API_KEY=sua_chave_anthropic
 CLOUDINARY_CLOUD_NAME=seu_cloud_name
 CLOUDINARY_API_KEY=sua_api_key
 CLOUDINARY_API_SECRET=seu_api_secret
+
+# Opcional — notificações de pedidos por e-mail
+GMAIL_USER=seu@gmail.com
+GMAIL_APP_PASSWORD=xxxx_xxxx_xxxx_xxxx
+STORE_EMAIL=lojista@email.com
 ```
 
 ```bash
@@ -327,12 +372,17 @@ console.log('Usuário promovido a admin.');
 - Arquitetura em camadas (routes → controllers → services → repositories) e por que ela facilita manutenção e testes
 - Autenticação segura com JWT em cookie HttpOnly — diferença prática para localStorage
 - Como implementar proteção CSRF sem depender de pacotes deprecados
-- Validação de inputs e outputs com Zod — incluindo saídas de LLMs
+- Validação de inputs e outputs com Zod — incluindo saídas de LLMs e normalização de CPF
 - Proteção contra prompt injection em aplicações com IA
 - Gestão de estado global com Context API — auth e carrinho sem Redux
-- Transações SQLite com guard de concorrência para pedidos
+- Transações SQLite manuais (BEGIN/COMMIT/ROLLBACK) com guard de concorrência — `node:sqlite` não tem `.transaction()`
+- Algoritmo de validação de CPF brasileiro (dígitos verificadores) no frontend e no backend
+- Índice parcial `WHERE cpf IS NOT NULL` para migração de banco sem violar constraint de unicidade
 - Upload e hospedagem de imagens via Cloudinary + multer
+- Envio de e-mail HTML transacional com nodemailer + Gmail App Password (fire-and-forget)
 - Rotas protegidas por autenticação e por role no React Router v6
+- Conformidade legal de e-commerce brasileiro — Decreto 7.962/2013, CDC, LGPD, Lei do SAC
+- ScrollToTop global com `useLocation` no React Router para corrigir scroll entre páginas
 - Deploy fullstack com Vercel (frontend) + Railway (backend)
 
 ---

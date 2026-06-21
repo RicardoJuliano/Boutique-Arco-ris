@@ -87,6 +87,11 @@ export default function CheckoutPage() {
     setAddress(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
+  function fillTestData() {
+    setCep('01310-100');
+    setAddress(prev => ({ ...prev, name: 'Teste da Silva', phone: '(11) 91234-5678' }));
+  }
+
   async function handleSubmit() {
     setError('');
     setSaving(true);
@@ -150,7 +155,16 @@ export default function CheckoutPage() {
             {/* ── ETAPA 0: ENDEREÇO + FRETE ── */}
             {step === 0 && (
               <div className="border border-border bg-surface p-6 space-y-5">
-                <h2 className="font-display text-xl font-light text-cream">Endereço de Entrega</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display text-xl font-light text-cream">Endereço de Entrega</h2>
+                  <button
+                    type="button"
+                    onClick={fillTestData}
+                    className="font-body text-xs font-light text-muted/60 border border-border/60 px-3 py-1 hover:text-gold hover:border-gold/40 transition-colors"
+                  >
+                    Preencher teste
+                  </button>
+                </div>
 
                 <div>
                   <label className="field-label">CEP</label>

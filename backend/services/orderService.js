@@ -26,7 +26,8 @@ const orderSchema = z.object({
 exports.createOrder = function createOrder(userId, body) {
   const data = orderSchema.parse(body);
 
-  return db.transaction(() => {
+  db.exec('BEGIN');
+  try {
     let subtotal = 0;
     const enrichedItems = [];
 
@@ -51,7 +52,7 @@ exports.createOrder = function createOrder(userId, body) {
       }
 
       subtotal += product.price * item.quantity;
-      enrichedItems.push({ ...item, unitPrice: product.price });
+      enrichedItems.push({ ...item, unitPrice: product.price, productName: product.name });
     }
 
     const total = subtotal + data.shippingFee;
@@ -74,6 +75,19 @@ exports.createOrder = function createOrder(userId, body) {
       });
     }
 
-    return { orderId, total, shippingFee: data.shippingFee, status: 'processing' };
-  })();
+    db.exec('COMMIT');
+    return {
+      orderId,
+      total,
+      shippingFee:    data.shippingFee,
+      status:         'processing',
+      items:          enrichedItems,
+      address:        data.address,
+      shippingMethod: data.shippingMethod,
+      paymentMethod:  data.paymentMethod,
+    };
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
 };

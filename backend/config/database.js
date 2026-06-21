@@ -13,16 +13,19 @@ db.exec(`
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     name          TEXT    NOT NULL,
     email         TEXT    UNIQUE NOT NULL,
+    cpf           TEXT    UNIQUE,
     password_hash TEXT    NOT NULL,
     is_admin      INTEGER DEFAULT 0,
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
 
-// Adicionar is_admin em bancos existentes sem a coluna
-try {
-  db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0');
-} catch (_) {}
+// Migrações para bancos existentes
+// Nota: SQLite não aceita UNIQUE em ALTER TABLE ADD COLUMN — adiciona a coluna
+// sem constraint e cria o índice em seguida (parcial: ignora NULLs de usuários antigos)
+try { db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0'); } catch (_) {}
+try { db.exec('ALTER TABLE users ADD COLUMN cpf TEXT'); } catch (_) {}
+try { db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_cpf ON users (cpf) WHERE cpf IS NOT NULL'); } catch (_) {}
 
 // Adicionar barcode em bancos existentes sem a coluna
 try {

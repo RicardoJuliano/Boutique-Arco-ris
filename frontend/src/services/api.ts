@@ -35,10 +35,10 @@ async function request<T = unknown>(path: string, options: RequestInit = {}): Pr
   return res.json();
 }
 
-export const register = (name: string, email: string, password: string) =>
+export const register = (name: string, email: string, cpf: string, password: string) =>
   request<{ user: User }>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, cpf, password }),
   });
 
 export const login = (email: string, password: string) =>

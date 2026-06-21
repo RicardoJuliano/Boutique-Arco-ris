@@ -1,6 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 
@@ -17,12 +24,16 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
+import PrivacidadePage from './pages/PrivacidadePage';
+import TrocasPage from './pages/TrocasPage';
+import TermosPage from './pages/TermosPage';
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/catalogo" element={<CatalogoPage />} />
@@ -39,6 +50,10 @@ export default function App() {
 
             <Route path="/admin/produtos" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
             <Route path="/admin/produtos/:id" element={<AdminRoute><ProductFormPage /></AdminRoute>} />
+
+            <Route path="/politica-de-privacidade" element={<PrivacidadePage />} />
+            <Route path="/trocas-e-devolucoes" element={<TrocasPage />} />
+            <Route path="/termos-de-uso" element={<TermosPage />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
