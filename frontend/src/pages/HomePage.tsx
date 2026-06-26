@@ -8,6 +8,7 @@ import ProductImage from '../components/ProductImage';
 import { useAuth } from '../hooks/useAuth';
 import { getProducts } from '../services/api';
 import { useStagger } from '../hooks/useStagger';
+import { useAutoScroll } from '../hooks/useAutoScroll';
 import { formatPrice } from '../utils/format';
 
 const TESTIMONIALS = [
@@ -41,14 +42,13 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-// Configuração responsiva: mobile usa menos frames e canvas menor para poupar memória
+// Configuração responsiva
 function heroConfig() {
   const mobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
   return {
-    FRAMES: mobile ? 30 : 60,   // frames pré-extraídos (30 mobile / 60 desktop)
-    W:      mobile ? 640 : 960, // largura interna do canvas
-    H:      mobile ? 360 : 540, // altura interna do canvas
-    LERP:   0.18,               // suavização por frame do RAF loop
+    FRAMES: mobile ? 15 : 30, // 30 frames = ~3s extração vs ~6s antes; suave o suficiente
+    W:      mobile ? 640 : 960,
+    H:      mobile ? 360 : 540,
   };
 }
 
@@ -57,26 +57,35 @@ export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const gridRef = useStagger([featured]);
 
-  const videoRef       = useRef<HTMLVideoElement>(null);
-  const canvasRef      = useRef<HTMLCanvasElement>(null);
-  const heroRef        = useRef<HTMLDivElement>(null);
-  const heroSectionRef = useRef<HTMLDivElement>(null);
+  const videoRef        = useRef<HTMLVideoElement>(null);
+  const canvasRef       = useRef<HTMLCanvasElement>(null);
+  const heroSectionRef  = useRef<HTMLDivElement>(null);
+  const heroContentRef  = useRef<HTMLDivElement>(null);
   const [posterVisible, setPosterVisible] = useState(true);
+
+  // Auto-scroll rápido: aguarda extração de frames (~3s) e depois dá um nudge
+  // visível de ~350px para mostrar a arara fechando. speed:4 = 240px/s → chega
+  // em 350px em ~1.5s, colocando a arara ~23% fechada de forma claramente percebida.
+  useAutoScroll({
+    speed:               4,
+    pauseOnInteraction:  true,
+    stopAt:              350,
+    delay:               3000,
+  });
 
   // Toda mutação de animação fica aqui — evita closure desatualizada dentro do RAF
   const anim = useRef({
-    frames:      [] as ImageBitmap[],
-    target:      0,     // índice de frame desejado (será FRAMES-1 = arara aberta)
-    current:     0,     // índice suavizado via lerp
-    rafId:       0,
-    ready:       false, // true quando todos os frames foram extraídos
-    visible:     true,  // false quando a section sai da viewport (IntersectionObserver)
+    frames:    [] as ImageBitmap[],
+    target:    0,      // índice de frame alvo (atualizado pelo scroll handler)
+    lastDrawn: -1,     // último índice desenhado no canvas (evita draws redundantes)
+    rafId:     0,
+    ready:     false,  // true após todos os frames extraídos
+    visible:   true,
     sectionTop:  0,
     scrollTrack: 1,
-    FRAMES:      60,    // atualizado na init com o valor responsivo
+    FRAMES:      30,
     W:           960,
     H:           540,
-    LERP:        0.18,
   });
 
   useEffect(() => {
@@ -104,24 +113,35 @@ export default function HomePage() {
     const state = anim.current;
     let aborted = false;
 
-    // Configura tamanhos responsivos
     const cfg = heroConfig();
-    const { FRAMES, W, H, LERP } = cfg;
-    state.FRAMES = FRAMES;
-    state.W      = W;
-    state.H      = H;
-    state.LERP   = LERP;
-    state.target  = FRAMES - 1; // começa na arara aberta
-    state.current = FRAMES - 1;
+    const { FRAMES, W, H } = cfg;
+    state.FRAMES    = FRAMES;
+    state.W         = W;
+    state.H         = H;
+    state.target    = 0;
+    state.lastDrawn = -1;
 
     canvas.width  = W;
     canvas.height = H;
     // alpha: false = sem composição de canal alfa (mais rápido + menos memória)
     const ctx = canvas.getContext('2d', { alpha: false })!;
 
-    // Desenha o frame do índice informado (se disponível no cache)
+    // Desenha o frame mais próximo disponível no cache.
+    // Durante a extração progressiva, alguns índices ainda estão undefined —
+    // buscamos o frame extraído mais próximo para não travar a animação.
     const drawFrame = (idx: number) => {
-      const bitmap = state.frames[Math.round(Math.max(0, Math.min(FRAMES - 1, idx)))];
+      const target = Math.round(Math.max(0, Math.min(FRAMES - 1, idx)));
+      let bitmap = state.frames[target];
+      if (!bitmap) {
+        for (let j = target - 1; j >= 0; j--) {
+          if (state.frames[j]) { bitmap = state.frames[j]; break; }
+        }
+        if (!bitmap) {
+          for (let j = target + 1; j < FRAMES; j++) {
+            if (state.frames[j]) { bitmap = state.frames[j]; break; }
+          }
+        }
+      }
       if (bitmap) ctx.drawImage(bitmap, 0, 0, W, H);
     };
 
@@ -135,18 +155,20 @@ export default function HomePage() {
     // Scroll handler: só calcula state.target — zero manipulação de DOM aqui
     const onScroll = () => {
       const scrolledIn = Math.max(0, window.scrollY - state.sectionTop);
-      // scrolledIn=0 → progress=1 (arara aberta) | scrolledIn=scrollTrack → progress=0 (fechada)
-      const progress = 1 - Math.min(1, scrolledIn / state.scrollTrack);
+      // scrolledIn=0 → progress=0 (fechada) | scrolledIn=scrollTrack → progress=1 (aberta)
+      // Scroll para baixo = abre; scroll para cima = fecha
+      const progress = Math.min(1, scrolledIn / state.scrollTrack);
       state.target = progress * (FRAMES - 1);
     };
 
-    // RAF loop: único responsável por escrever no canvas, a cada ~16ms (60 FPS)
+    // RAF loop: sincroniza canvas com target apenas quando o índice muda.
+    // Sem LERP — o scroll controla diretamente, sem lag artificial.
     const tick = () => {
       if (state.ready && state.visible) {
-        const diff = state.target - state.current;
-        if (Math.abs(diff) > 0.15) {
-          state.current += diff * LERP;
-          drawFrame(state.current);
+        const frameIdx = Math.round(state.target);
+        if (frameIdx !== state.lastDrawn) {
+          state.lastDrawn = frameIdx;
+          drawFrame(frameIdx);
         }
       }
       state.rafId = requestAnimationFrame(tick);
@@ -168,30 +190,37 @@ export default function HomePage() {
         video.currentTime = t;
       });
 
-    // Extração: pré-renderiza os frames no canvas e salva como ImageBitmap (GPU)
+    // Extração progressiva de frames:
+    // 1. Extrai frame 0 (fechada) imediatamente → animação inicia já
+    // 2. Extrai os demais em background → qualidade melhora continuamente
     const extractFrames = async () => {
       const dur = video.duration;
       if (!dur || !isFinite(dur)) return;
 
-      // Canvas temporário off-screen: extrai frames sem aparecer na tela
       const tmp    = document.createElement('canvas');
       tmp.width    = W;
       tmp.height   = H;
       const tmpCtx = tmp.getContext('2d', { alpha: false })!;
-      const frames: ImageBitmap[] = new Array(FRAMES);
 
-      // Extrai o último frame primeiro (arara aberta) para exibição imediata
-      // Usa dur*0.999 para evitar problemas de "end of stream" em alguns browsers
-      await seekTo(dur * 0.999);
+      // Aponta state.frames para o array ANTES de começar, para que drawFrame
+      // possa acessar os frames já extraídos enquanto os demais ainda processam.
+      const frames: ImageBitmap[] = new Array(FRAMES);
+      state.frames = frames;
+
+      // Frame 0: início do vídeo (arara fechada) — keyframe, seek quase instantâneo
+      await seekTo(dur * 0.001);
       if (aborted) return;
       tmpCtx.drawImage(video, 0, 0, W, H);
-      frames[FRAMES - 1] = await createImageBitmap(tmp);
-      // Exibe imediatamente no canvas visível e ativa crossfade poster→canvas
-      ctx.drawImage(frames[FRAMES - 1], 0, 0, W, H);
+      frames[0] = await createImageBitmap(tmp);
+      ctx.drawImage(frames[0], 0, 0, W, H);
       setPosterVisible(false);
 
-      // Extrai os frames restantes em ordem crescente (0 → FRAMES-2)
-      for (let i = 0; i < FRAMES - 1; i++) {
+      // Animação começa AQUI — só frame 0 disponível, os demais chegam em background.
+      state.lastDrawn = -1; // força redraw no próximo tick
+      state.ready     = true;
+
+      // Frames 1 → FRAMES-2 em sequência
+      for (let i = 1; i < FRAMES - 1; i++) {
         if (aborted) return;
         await seekTo((i / (FRAMES - 1)) * dur);
         if (aborted) return;
@@ -199,22 +228,27 @@ export default function HomePage() {
         frames[i] = await createImageBitmap(tmp);
       }
 
-      state.frames  = frames;
-      state.current = state.target; // snapa para posição atual do scroll (sem salto)
-      state.ready   = true;
+      // Frame FRAMES-1: fim do vídeo (arara aberta) — 0.999 evita end-of-stream
+      if (!aborted) {
+        await seekTo(dur * 0.999);
+        if (!aborted) {
+          tmpCtx.drawImage(video, 0, 0, W, H);
+          frames[FRAMES - 1] = await createImageBitmap(tmp);
+        }
+      }
     };
 
     // IntersectionObserver:
     // - pausa o RAF quando a seção sai da viewport (economiza CPU/bateria)
-    // - RESETA para arara aberta quando o usuário sai da seção, para que ao
-    //   retornar ao topo a próxima visita comece com a animação completa
+    // - Mantém a arara ABERTA ao sair (estado final do scroll para baixo).
+    //   Quando o usuário voltar rolando para cima, a arara fechará corretamente.
     const io = new IntersectionObserver(
       ([entry]) => {
         state.visible = entry.isIntersecting;
         if (!entry.isIntersecting && state.ready) {
-          state.target  = FRAMES - 1;
-          state.current = FRAMES - 1;
-          drawFrame(FRAMES - 1); // garante que o canvas mostra a arara aberta
+          state.target    = FRAMES - 1;
+          state.lastDrawn = FRAMES - 1;
+          drawFrame(FRAMES - 1);
         }
       },
       { threshold: 0 }
@@ -249,6 +283,21 @@ export default function HomePage() {
     };
   }, []);
 
+  // Parallax: conteúdo do hero desce levemente e desbota enquanto o usuário rola
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const content = heroContentRef.current;
+    if (!content) return;
+    const onScroll = () => {
+      const y = window.scrollY;
+      content.style.transform = `translateY(${y * 0.3}px)`;
+      content.style.opacity   = String(Math.max(0, 1 - y / 600));
+    };
+    onScroll(); // sincroniza com posição atual ao montar
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-bg">
       <Navbar />
@@ -270,7 +319,6 @@ export default function HomePage() {
           que exclui a barra de endereço do mobile (Safari iOS, Chrome Android).
         */}
         <div
-          ref={heroRef}
           className="sticky top-0 h-screen overflow-hidden"
           style={{ height: '100dvh' }}
         >
@@ -331,7 +379,7 @@ export default function HomePage() {
 
           {/* Conteúdo — centralizado verticalmente com espaço para a navbar */}
           <div className="relative h-full flex flex-col justify-center">
-            <div className="max-w-6xl mx-auto px-6 w-full pt-20 md:pt-24">
+            <div ref={heroContentRef} className="max-w-6xl mx-auto px-6 w-full pt-20 md:pt-24">
               <p className="hero-line hero-line-1 hero-eyebrow">Loja Multimarcas — Buenópolis, MG</p>
               <h1 className="hero-line hero-line-2 font-display text-5xl md:text-7xl font-light text-cream leading-tight mb-4 max-w-xl">
                 A luz mais brilhante
