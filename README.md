@@ -1,62 +1,42 @@
-# Boutique Arco-Íris — E-commerce Fullstack com IA
+# Boutique Arco-Íris
 
-Aplicação web fullstack de portfólio que combina um e-commerce de moda completo com uma consultora de estilo alimentada pela API da Anthropic. O usuário navega pelo catálogo, recebe recomendações personalizadas via IA, adiciona produtos ao carrinho e finaliza pedidos — tudo com autenticação segura e painel administrativo completo.
+E-commerce de moda com consultora de estilo por IA. Comecei esse projeto para ter uma loja real para a Boutique Arco-Íris, uma loja física de roupas, e acabou virando meu projeto de portfólio principal.
 
-## Tecnologias
+A parte mais interessante é a consultora de estilo: o usuário responde um quiz de 6 perguntas sobre seu estilo e a API da Anthropic devolve 3 recomendações personalizadas com justificativa para cada uma.
 
-**Frontend**
-- React 18 + TypeScript (strict mode)
-- Tailwind CSS
-- Vite
+## Stack
 
-**Backend**
-- Node.js + Express.js
-- SQLite + Knex.js
-- JWT (HttpOnly cookie)
-- Zod (validação)
-- Cloudinary (upload de imagens)
-- Anthropic API (IA)
-- ZXing (leitor de código de barras via câmera)
+**Frontend:** React 18, TypeScript (strict mode), Tailwind CSS, Vite
 
-## Funcionalidades
+**Backend:** Node.js, Express, SQLite, Knex, JWT via cookie HttpOnly, Zod, Cloudinary, Anthropic API, ZXing
 
-**Para o cliente**
-- Catálogo com filtros por categoria e busca por nome/descrição
-- Consultora de estilo por IA com quiz de 6 perguntas e recomendações personalizadas
-- Histórico de consultorias anteriores
-- Carrinho de compras persistente entre páginas
-- Checkout completo com cálculo de frete (PAC/SEDEX) e múltiplas formas de pagamento
-- Autenticação com CPF validado e sessão segura via cookie HttpOnly
+## O que tem no projeto
 
-**Para o administrador**
-- Painel admin com gestão de produtos, pedidos e estoque
-- Leitor de código de barras via câmera para cadastro rápido
-- Upload de imagens via Cloudinary
-- Controle de produtos ativos/inativos
+- Catálogo com busca por nome/descrição e filtros por categoria
+- Consultora de estilo com IA e histórico de consultorias anteriores
+- Carrinho persistente entre páginas
+- Checkout com cálculo de frete PAC/SEDEX e pagamento por cartão ou PIX
+- Login com CPF validado e sessão segura
+- Painel admin com leitor de código de barras via câmera, upload de imagens no Cloudinary e controle de estoque
 
-## Arquitetura
+O backend segue arquitetura Controller/Service/Repository. Passei por uma sessão grande de refatoração (48 arquivos) depois que o projeto cresceu demais sem estrutura, e também corrigi 8 bugs de produção com diagnóstico de causa raiz — a maioria vinha de inconsistência de nomenclatura entre frontend e backend.
 
-O backend segue arquitetura em camadas (Controller / Service / Repository), com validação centralizada via Zod e separação clara de responsabilidades.
-
-## Como rodar localmente
+## Como rodar
 
 ```bash
-# Clone o repositório
 git clone https://github.com/RicardoJuliano/Boutique-Arco-ris.git
 
-# Backend
-cd server
-npm install
-cp .env.example .env  # configure as variáveis de ambiente
+# backend
+cd server && npm install
+cp .env.example .env
 npm run dev
 
-# Frontend
-cd client
-npm install
+# frontend
+cd client && npm install
 npm run dev
 ```
 
-**Variáveis de ambiente necessárias:**
+Variáveis necessárias no `.env`:
 ```
 ANTHROPIC_API_KEY=
 CLOUDINARY_CLOUD_NAME=
@@ -66,6 +46,6 @@ JWT_SECRET=
 ADMIN_EMAIL=
 ```
 
-## Autor
+---
 
-Ricardo Juliano — [LinkedIn](https://linkedin.com/in/ricardo-juliano) • [GitHub](https://github.com/RicardoJuliano)
+Ricardo Juliano — [LinkedIn](https://linkedin.com/in/ricardo-juliano)
