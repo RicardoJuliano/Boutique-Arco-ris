@@ -1,12 +1,12 @@
-const orderService    = require('../services/orderService');
+﻿const orderService    = require('../services/orderService');
 const orderRepository = require('../repositories/orderRepository');
 const { sendOrderEmail } = require('../utils/mailer');
 
 exports.create = async function create(req, res, next) {
   try {
-    const result = orderService.createOrder(req.user.id, req.body);
+    const result = await orderService.createOrder(req.user.id, req.body);
 
-    // Responde ao cliente imediatamente — email é disparado sem bloquear
+    // Responde ao cliente imediatamente â€” email Ã© disparado sem bloquear
     res.status(201).json({
       orderId:     result.orderId,
       total:       result.total,
@@ -15,7 +15,7 @@ exports.create = async function create(req, res, next) {
     });
 
     sendOrderEmail(result, req.user).catch((err) =>
-      console.error('[email] Falha ao enviar notificação de pedido:', err.message)
+      console.error('[email] Falha ao enviar notificaÃ§Ã£o de pedido:', err.message)
     );
   } catch (err) {
     next(err);
@@ -34,9 +34,10 @@ exports.list = function list(req, res, next) {
 exports.getById = function getById(req, res, next) {
   try {
     const order = orderRepository.findById(Number(req.params.id), req.user.id);
-    if (!order) return res.status(404).json({ error: 'Pedido não encontrado' });
+    if (!order) return res.status(404).json({ error: 'Pedido nÃ£o encontrado' });
     res.json({ order });
   } catch (err) {
     next(err);
   }
 };
+

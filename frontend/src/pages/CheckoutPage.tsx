@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../utils/format';
@@ -7,7 +7,7 @@ import { useCart } from '../context/CartContext';
 import { createOrder, getFreight } from '../services/api';
 import type { FreightResponse } from '../types';
 
-const STEPS = ['Endereço', 'Pagamento', 'Revisão'];
+const STEPS = ['EndereÃ§o', 'Pagamento', 'RevisÃ£o'];
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
@@ -27,8 +27,7 @@ export default function CheckoutPage() {
   const [freightOptions, setFreightOptions] = useState<FreightResponse['shipping'] | null>(null);
   const [shippingMethod, setShippingMethod] = useState('pac');
 
-  const [paymentMethod, setPaymentMethod] = useState('pix');
-  const [card, setCard] = useState({ number: '', name: '', expiry: '', cvv: '' });
+  const [paymentMethod] = useState('pix');
 
   const cepTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -152,11 +151,11 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 space-y-4">
 
-            {/* ── ETAPA 0: ENDEREÇO + FRETE ── */}
+            {/* â”€â”€ ETAPA 0: ENDEREÃ‡O + FRETE â”€â”€ */}
             {step === 0 && (
               <div className="border border-border bg-surface p-6 space-y-5">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-display text-xl font-light text-cream">Endereço de Entrega</h2>
+                  <h2 className="font-display text-xl font-light text-cream">EndereÃ§o de Entrega</h2>
                   <button
                     type="button"
                     onClick={fillTestData}
@@ -183,7 +182,7 @@ export default function CheckoutPage() {
                       </div>
                     )}
                     {freightOptions && !cepLoading && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gold text-sm">✓</div>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gold text-sm">âœ“</div>
                     )}
                   </div>
                   {cepError && (
@@ -191,14 +190,14 @@ export default function CheckoutPage() {
                   )}
                   {!freightOptions && !cepLoading && !cepError && cep.replace(/\D/g,'').length < 8 && (
                     <p className="font-body text-xs font-light text-muted mt-1.5">
-                      Digite o CEP para calcular o frete e preencher o endereço automaticamente.
+                      Digite o CEP para calcular o frete e preencher o endereÃ§o automaticamente.
                     </p>
                   )}
                 </div>
 
                 <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${freightOptions ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
                   <div className="sm:col-span-2">
-                    <label className="field-label">Nome completo do destinatário</label>
+                    <label className="field-label">Nome completo do destinatÃ¡rio</label>
                     <input name="name" value={address.name} onChange={handleAddrChange} className="field-input" placeholder="Maria Silva" />
                   </div>
                   <div className="sm:col-span-2">
@@ -215,7 +214,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className="field-label">Cidade</label>
-                    <input name="city" value={address.city} onChange={handleAddrChange} className="field-input" placeholder="São Paulo" />
+                    <input name="city" value={address.city} onChange={handleAddrChange} className="field-input" placeholder="SÃ£o Paulo" />
                   </div>
                   <div>
                     <label className="field-label">Estado</label>
@@ -230,7 +229,7 @@ export default function CheckoutPage() {
                 {freightOptions && (
                   <div className="border-t border-border pt-5">
                     <h3 className="font-body text-xs tracking-widest uppercase text-muted mb-4">
-                      Opções de Entrega — Preços Correios 2025
+                      OpÃ§Ãµes de Entrega â€” PreÃ§os Correios 2025
                     </h3>
                     <div className="space-y-2">
                       {Object.entries(freightOptions).map(([key, opt]) => (
@@ -249,7 +248,7 @@ export default function CheckoutPage() {
                             />
                             <div>
                               <p className="font-body text-sm font-light text-cream">{opt.label}</p>
-                              <p className="font-body text-xs font-light text-muted">Correios • Código {opt.code}</p>
+                              <p className="font-body text-xs font-light text-muted">Correios â€¢ CÃ³digo {opt.code}</p>
                             </div>
                           </div>
                           <span className="font-display text-base font-light text-gold">
@@ -271,21 +270,21 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* ── ETAPA 1: PAGAMENTO ── */}
+            {/* â”€â”€ ETAPA 1: PAGAMENTO â”€â”€ */}
             {step === 1 && (
               <div className="border border-border bg-surface p-6 space-y-4">
-                <h2 className="font-display text-xl font-light text-cream mb-4">Método de Pagamento</h2>
+                <h2 className="font-display text-xl font-light text-cream mb-4">MÃ©todo de Pagamento</h2>
                 <div className="space-y-2">
                   {[
-                    { key: 'pix',  label: 'Pix',              desc: 'Pagamento instantâneo com QR Code' },
-                    { key: 'card', label: 'Cartão de Crédito', desc: 'Visa, Mastercard, Elo e outros' },
+                    { key: 'pix',  label: 'Pix',              desc: 'Pagamento instantÃ¢neo com QR Code' },
+                    { key: 'card', label: 'CartÃ£o de CrÃ©dito', desc: 'Visa, Mastercard, Elo e outros' },
                   ].map(({ key, label, desc }) => (
                     <label
                       key={key}
                       className={`flex items-start gap-3 p-4 border cursor-pointer transition-colors duration-200
                         ${paymentMethod === key ? 'border-gold bg-gold/5' : 'border-border hover:border-gold/40'}`}
                     >
-                      <input type="radio" name="payment" checked={paymentMethod === key} onChange={() => setPaymentMethod(key)} className="accent-gold mt-1" />
+                      <input type="radio" name="payment" checked={paymentMethod === key} readOnly className="accent-gold mt-1" />
                       <div>
                         <p className="font-body text-sm font-light text-cream">{label}</p>
                         <p className="font-body text-xs font-light text-muted">{desc}</p>
@@ -300,35 +299,16 @@ export default function CheckoutPage() {
                       <span className="font-body text-xs text-muted">QR Code</span>
                     </div>
                     <p className="font-body text-xs font-light text-muted">
-                      O QR Code Pix será gerado ao confirmar o pedido.
+                      O QR Code Pix serÃ¡ gerado ao confirmar o pedido.
                     </p>
                   </div>
                 )}
 
-                {/* TODO(PCI-DSS): substituir por iframe tokenizado (Stripe Elements / Mercado Pago) antes do deploy */}
-                {paymentMethod === 'card' && (
-                  <div className="space-y-3 border border-border bg-surface2 p-4">
-                    <div>
-                      <label className="field-label">Número do cartão</label>
-                      <input value={card.number} onChange={e => setCard(p => ({...p, number: e.target.value}))} className="field-input" placeholder="0000 0000 0000 0000" maxLength={19} />
-                    </div>
-                    <div>
-                      <label className="field-label">Nome impresso no cartão</label>
-                      <input value={card.name} onChange={e => setCard(p => ({...p, name: e.target.value}))} className="field-input" placeholder="MARIA SILVA" style={{ textTransform: 'uppercase' }} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="field-label">Validade</label>
-                        <input value={card.expiry} onChange={e => setCard(p => ({...p, expiry: e.target.value}))} className="field-input" placeholder="MM/AA" maxLength={5} />
-                      </div>
-                      <div>
-                        <label className="field-label">CVV</label>
-                        <input value={card.cvv} onChange={e => setCard(p => ({...p, cvv: e.target.value}))} className="field-input" placeholder="123" maxLength={4} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
+                <div className="border border-border bg-surface2 p-4">
+                  <p className="font-body text-xs font-light text-muted">
+                    Pagamento por cartão será habilitado apenas via provedor tokenizado.
+                  </p>
+                </div>
                 <div className="flex gap-3 mt-2">
                   <button onClick={() => setStep(0)} className="btn-outline px-6 py-3">Voltar</button>
                   <button onClick={() => setStep(2)} className="btn-gold flex-1 py-3">Revisar Pedido</button>
@@ -336,10 +316,10 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* ── ETAPA 2: REVISÃO ── */}
+            {/* â”€â”€ ETAPA 2: REVISÃƒO â”€â”€ */}
             {step === 2 && (
               <div className="border border-border bg-surface p-6 space-y-5">
-                <h2 className="font-display text-xl font-light text-cream">Revisão do Pedido</h2>
+                <h2 className="font-display text-xl font-light text-cream">RevisÃ£o do Pedido</h2>
 
                 <div className="divide-y divide-border">
                   {items.map(({ product, size, quantity }) => (
@@ -352,7 +332,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-display text-sm font-light text-cream">{product.name}</p>
-                        <p className="font-body text-xs font-light text-muted">Tam. {size} · Qtd. {quantity}</p>
+                        <p className="font-body text-xs font-light text-muted">Tam. {size} Â· Qtd. {quantity}</p>
                         <p className="font-body text-sm font-light text-gold mt-1">{formatPrice(product.price * quantity)}</p>
                       </div>
                     </div>
@@ -365,7 +345,7 @@ export default function CheckoutPage() {
                     {address.street}{address.complement ? `, ${address.complement}` : ''}
                   </p>
                   <p className="font-body text-sm font-light text-muted">
-                    {address.district && `${address.district} · `}{address.city} – {address.state} · CEP {cep}
+                    {address.district && `${address.district} Â· `}{address.city} â€“ {address.state} Â· CEP {cep}
                   </p>
                   <p className="font-body text-sm font-light text-muted">{shipping?.label}</p>
                 </div>
@@ -373,7 +353,7 @@ export default function CheckoutPage() {
                 <div className="border-t border-border pt-4 space-y-1.5">
                   <p className="font-body text-xs font-light text-muted tracking-widest uppercase mb-2">Pagamento</p>
                   <p className="font-body text-sm font-light text-cream">
-                    {paymentMethod === 'pix' ? 'Pix' : 'Cartão de Crédito'}
+                    {paymentMethod === 'pix' ? 'Pix' : 'CartÃ£o de CrÃ©dito'}
                   </p>
                 </div>
 
@@ -395,7 +375,7 @@ export default function CheckoutPage() {
             <div className="space-y-1.5 border-t border-border pt-3">
               {items.map(({ product, size, quantity }) => (
                 <div key={`${product.id}-${size}`} className="flex justify-between font-body text-xs font-light text-muted">
-                  <span className="truncate pr-2">{product.name} ({size}) ×{quantity}</span>
+                  <span className="truncate pr-2">{product.name} ({size}) Ã—{quantity}</span>
                   <span className="shrink-0">{formatPrice(product.price * quantity)}</span>
                 </div>
               ))}
@@ -425,3 +405,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

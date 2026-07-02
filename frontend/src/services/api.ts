@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   User,
   Product,
   ProductPayload,
@@ -10,6 +10,19 @@ import type {
 } from '../types';
 
 const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
+
+function getCookie(name: string): string | null {
+  const prefix = `${name}=`;
+  const value = document.cookie
+    .split('; ')
+    .find((entry) => entry.startsWith(prefix));
+  return value ? decodeURIComponent(value.slice(prefix.length)) : null;
+}
+
+function withCsrf(headers: HeadersInit = {}): HeadersInit {
+  const token = getCookie('csrfToken');
+  return token ? { ...headers, 'X-CSRF-Token': token } : headers;
+}
 
 async function request<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -23,7 +36,7 @@ async function request<T = unknown>(path: string, options: RequestInit = {}): Pr
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Erro desconhecido' }));
-    const error = new Error(err.error || 'Erro na requisição') as Error & {
+    const error = new Error(err.error || 'Erro na requisiÃ§Ã£o') as Error & {
       status?: number;
       details?: unknown;
     };
@@ -97,6 +110,7 @@ export const adminUploadImage = (file: File, productId?: number | string) => {
   return fetch(`${BASE}/admin/products/upload`, {
     method: 'POST',
     credentials: 'include',
+    headers: withCsrf(),
     body: form,
   }).then(async (res) => {
     if (!res.ok) {
@@ -114,6 +128,7 @@ export const adminAddProductImage = (productId: number | string, file: File) => 
   return fetch(`${BASE}/admin/products/${productId}/images`, {
     method: 'POST',
     credentials: 'include',
+    headers: withCsrf(),
     body: form,
   }).then(async (res) => {
     if (!res.ok) {
@@ -141,3 +156,4 @@ export const getOrders = () =>
 
 export const getOrder = (id: number | string) =>
   request<{ order: Order }>(`/orders/${id}`);
+

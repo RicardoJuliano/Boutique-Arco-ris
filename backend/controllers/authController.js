@@ -1,9 +1,10 @@
-const authService = require('../services/authService');
+﻿const authService = require('../services/authService');
+const { setCsrfCookie, clearCsrfCookie } = require('../middlewares/csrfMiddleware');
 const { registerSchema, loginSchema } = require('../validators/authValidator');
 
 const isProd = process.env.NODE_ENV === 'production';
 
-// cross-origin em produção (Vercel → Render) exige sameSite=none + secure
+// cross-origin em produÃ§Ã£o (Vercel â†’ Render) exige sameSite=none + secure
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: isProd,
@@ -16,7 +17,8 @@ exports.register = async function register(req, res, next) {
     const data = registerSchema.parse(req.body);
     const { user, token } = await authService.register(data);
     res.cookie('token', token, COOKIE_OPTIONS);
-    res.status(201).json({ user });
+    const csrfToken = setCsrfCookie(res);
+    res.status(201).json({ user, csrfToken });
   } catch (err) {
     next(err);
   }
@@ -27,7 +29,8 @@ exports.login = async function login(req, res, next) {
     const data = loginSchema.parse(req.body);
     const { user, token } = await authService.login(data);
     res.cookie('token', token, COOKIE_OPTIONS);
-    res.json({ user });
+    const csrfToken = setCsrfCookie(res);
+    res.json({ user, csrfToken });
   } catch (err) {
     next(err);
   }
@@ -39,9 +42,13 @@ exports.logout = function logout(req, res) {
     secure: isProd,
     sameSite: isProd ? 'none' : 'strict',
   });
+  clearCsrfCookie(res);
   res.json({ message: 'Logout realizado com sucesso' });
 };
 
 exports.me = function me(req, res) {
-  res.json({ user: req.user });
+  const csrfToken = setCsrfCookie(res);
+  res.json({ user: req.user, csrfToken });
 };
+
+
