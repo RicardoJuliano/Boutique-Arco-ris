@@ -43,13 +43,37 @@ export default function Navbar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const onScroll = () => {
+    let ticking = false;
+    let currentScrolled = false;
+    let currentHidden = false;
+
+    const update = () => {
       const y = window.scrollY;
-      setScrolled(y > 50);
-      if (y > lastY.current && y > 110) setHidden(true);
-      else if (y < lastY.current) setHidden(false);
+      const nextScrolled = y > 50;
+      const nextHidden = y > lastY.current && y > 110;
+
+      if (nextScrolled !== currentScrolled) {
+        currentScrolled = nextScrolled;
+        setScrolled(nextScrolled);
+      }
+
+      if (nextHidden !== currentHidden) {
+        currentHidden = nextHidden;
+        setHidden(nextHidden);
+      }
+
       lastY.current = y;
+      ticking = false;
     };
+
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);

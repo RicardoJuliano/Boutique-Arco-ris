@@ -20,6 +20,7 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const freightRoutes = require('./routes/freightRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
+const { isAllowedOrigin } = require('./config/allowedOrigins');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -27,7 +28,15 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet({ contentSecurityPolicy: true }));
 
 // credentials: true é obrigatório para que o browser envie cookies cross-origin
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || isAllowedOrigin(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origin not allowed by CORS'));
+  },
+  credentials: true,
+}));
 
 app.use(cookieParser());
 

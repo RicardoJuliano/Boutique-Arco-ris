@@ -7,27 +7,33 @@ export function useStagger(deps: DependencyList = []) {
     const container = ref.current;
     if (!container) return;
 
-    const items = container.querySelectorAll('.stagger-item');
+    const items = Array.from(container.querySelectorAll<HTMLElement>('.stagger-item'));
     if (!items.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
             entry.target.classList.add('in-view');
             observer.unobserve(entry.target);
           }
-        });
+        }
       },
-      { rootMargin: '0px 0px -40px 0px', threshold: 0.08 }
+      { rootMargin: '120px 0px -24px 0px', threshold: 0.01 }
     );
 
     items.forEach((item, i) => {
-      (item as HTMLElement).style.transitionDelay = `${i * 65}ms`;
+      item.classList.remove('in-view');
+      item.style.transitionDelay = `${Math.min(i * 28, 168)}ms`;
       observer.observe(item);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      items.forEach((item) => {
+        item.style.transitionDelay = '';
+      });
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 

@@ -1,4 +1,5 @@
 ﻿const crypto = require('crypto');
+const { isAllowedOrigin } = require('../config/allowedOrigins');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -32,16 +33,7 @@ function csrfMiddleware(req, res, next) {
   if (safeMethods.includes(req.method)) return next();
 
   const originHeader = req.headers.origin || req.headers.referer;
-  const allowed = process.env.FRONTEND_URL;
-
-  let originOk = false;
-  try {
-    if (originHeader && allowed) {
-      originOk = new URL(originHeader).origin === new URL(allowed).origin;
-    }
-  } catch {
-    originOk = false;
-  }
+  const originOk = isAllowedOrigin(originHeader);
 
   if (!originOk) {
     return res.status(403).json({ error: 'Requisicao bloqueada: origin invalida' });
