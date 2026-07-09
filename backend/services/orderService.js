@@ -1,5 +1,5 @@
-﻿const { z } = require('zod');
-const db = require('../config/database');
+const { z } = require('zod');
+const pool = require('../config/database');
 const orderRepository = require('../repositories/orderRepository');
 const { getFreightQuote } = require('./freightService');
 
@@ -31,19 +31,23 @@ exports.createOrder = async function createOrder(userId, body) {
   const freightQuote = await getFreightQuote(data.address.zip, itemCount);
   const selectedShipping = freightQuote.shipping[data.shippingMethod];
   if (!selectedShipping) {
-    throw Object.assign(new Error('Metodo de frete invalido'), { status: 422 });
+    throw Object.assign(new Error('Método de frete inválido'), { status: 422 });
   }
   const shippingFee = selectedShipping.price;
 
-  db.exec('BEGIN');
+  const client = await pool.connect();
   try {
+    await client.query('BEGIN');
+
     let subtotal = 0;
     const enrichedItems = [];
 
     for (const item of data.items) {
-      const product = db.prepare(
-        'SELECT id, name, price, stock, active FROM products WHERE id = ?'
-      ).get(item.productId);
+      const { rows } = await client.query(
+        'SELECT id, name, price, stock, active FROM products WHERE id = $1',
+        [item.productId]
+      );
+      const product = rows[0];
 
       if (!product || !product.active) {
         throw Object.assign(new Error(`Produto ${item.productId} não encontrado`), { status: 422 });
@@ -53,10 +57,11 @@ exports.createOrder = async function createOrder(userId, body) {
       }
 
       // guard de concorrência: só decrementa se o estoque ainda for suficiente no momento do UPDATE
-      const { changes } = db.prepare(
-        'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?'
-      ).run(item.quantity, product.id, item.quantity);
-      if (changes === 0) {
+      const { rowCount } = await client.query(
+        'UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1',
+        [item.quantity, product.id]
+      );
+      if (rowCount === 0) {
         throw Object.assign(new Error(`Estoque insuficiente para "${product.name}"`), { status: 422 });
       }
 
@@ -65,26 +70,26 @@ exports.createOrder = async function createOrder(userId, body) {
     }
 
     const total = subtotal + shippingFee;
-    const orderId = orderRepository.create({
+    const orderId = await orderRepository.create({
       userId,
       total,
       shippingFee,
       address:        data.address,
       shippingMethod: data.shippingMethod,
       paymentMethod:  data.paymentMethod,
-    });
+    }, client);
 
     for (const item of enrichedItems) {
-      orderRepository.addItem({
+      await orderRepository.addItem({
         orderId,
         productId: item.productId,
         size:      item.size,
         quantity:  item.quantity,
         unitPrice: item.unitPrice,
-      });
+      }, client);
     }
 
-    db.exec('COMMIT');
+    await client.query('COMMIT');
     return {
       orderId,
       total,
@@ -96,9 +101,9 @@ exports.createOrder = async function createOrder(userId, body) {
       paymentMethod:  data.paymentMethod,
     };
   } catch (err) {
-    db.exec('ROLLBACK');
+    await client.query('ROLLBACK');
     throw err;
+  } finally {
+    client.release();
   }
 };
-
-

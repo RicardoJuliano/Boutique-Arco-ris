@@ -14,7 +14,6 @@ const productSchema = z.object({
   stock:       z.number().int().min(0).max(9999),
   description: z.string().max(2000).optional().default(''),
   tag:         z.string().max(50).optional().nullable(),
-  // imageUrl deve ser URL https ou string vazia — nunca javascript:
   imageUrl:    z.string().url().startsWith('https://').max(500).optional().or(z.literal('')),
   barcode:     z.string().max(100).optional().nullable(),
   active:      z.boolean().optional(),
@@ -24,18 +23,18 @@ const productSchema = z.object({
   sizes:       z.array(z.enum(VALID_SIZES)).min(1).max(14),
 });
 
-exports.listProducts = function listProducts(req, res, next) {
+exports.listProducts = async function listProducts(req, res, next) {
   try {
-    const products = productRepository.findAll();
+    const products = await productRepository.findAll();
     res.json({ products });
   } catch (err) {
     next(err);
   }
 };
 
-exports.getProduct = function getProduct(req, res, next) {
+exports.getProduct = async function getProduct(req, res, next) {
   try {
-    const product = productRepository.findById(Number(req.params.id));
+    const product = await productRepository.findById(Number(req.params.id));
     if (!product) return res.status(404).json({ error: 'Produto não encontrado' });
     res.json({ product });
   } catch (err) {
@@ -43,7 +42,7 @@ exports.getProduct = function getProduct(req, res, next) {
   }
 };
 
-exports.createProduct = function createProduct(req, res, next) {
+exports.createProduct = async function createProduct(req, res, next) {
   try {
     const body = {
       ...req.body,
@@ -60,14 +59,14 @@ exports.createProduct = function createProduct(req, res, next) {
       return res.status(400).json({ error: 'Dados inválidos', details: parsed.error.flatten() });
     }
 
-    const product = productRepository.create({ ...parsed.data, tag: parsed.data.tag || null });
+    const product = await productRepository.create({ ...parsed.data, tag: parsed.data.tag || null });
     res.status(201).json({ product });
   } catch (err) {
     next(err);
   }
 };
 
-exports.updateProduct = function updateProduct(req, res, next) {
+exports.updateProduct = async function updateProduct(req, res, next) {
   try {
     const id = Number(req.params.id);
     const body = { ...req.body };
@@ -78,13 +77,12 @@ exports.updateProduct = function updateProduct(req, res, next) {
     if (body.occasions) body.occasions = parseField(body.occasions);
     if (body.sizes)     body.sizes     = parseField(body.sizes);
 
-    // Valida apenas os campos enviados (partial update)
     const parsed = productSchema.partial().safeParse(body);
     if (!parsed.success) {
       return res.status(400).json({ error: 'Dados inválidos', details: parsed.error.flatten() });
     }
 
-    const product = productRepository.update(id, parsed.data);
+    const product = await productRepository.update(id, parsed.data);
     if (!product) return res.status(404).json({ error: 'Produto não encontrado' });
     res.json({ product });
   } catch (err) {
@@ -92,9 +90,9 @@ exports.updateProduct = function updateProduct(req, res, next) {
   }
 };
 
-exports.deleteProduct = function deleteProduct(req, res, next) {
+exports.deleteProduct = async function deleteProduct(req, res, next) {
   try {
-    productRepository.remove(Number(req.params.id));
+    await productRepository.remove(Number(req.params.id));
     res.json({ message: 'Produto removido' });
   } catch (err) {
     next(err);
@@ -118,7 +116,7 @@ exports.uploadImage = async function uploadImage(req, res, next) {
     const result = await uploadToCloudinary(req.file.buffer);
 
     if (req.body.productId) {
-      productRepository.update(Number(req.body.productId), { imageUrl: result.secure_url });
+      await productRepository.update(Number(req.body.productId), { imageUrl: result.secure_url });
     }
 
     res.json({ url: result.secure_url });
@@ -132,7 +130,7 @@ exports.uploadExtraImage = async function uploadExtraImage(req, res, next) {
     const productId = Number(req.params.id);
     if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
 
-    const product = productRepository.findById(productId);
+    const product = await productRepository.findById(productId);
     if (!product) return res.status(404).json({ error: 'Produto não encontrado' });
 
     if ((product.images?.length ?? 0) >= 4) {
@@ -140,16 +138,16 @@ exports.uploadExtraImage = async function uploadExtraImage(req, res, next) {
     }
 
     const result = await uploadToCloudinary(req.file.buffer);
-    const image = productRepository.addImage(productId, result.secure_url);
+    const image = await productRepository.addImage(productId, result.secure_url);
     res.status(201).json({ image });
   } catch (err) {
     next(err);
   }
 };
 
-exports.deleteExtraImage = function deleteExtraImage(req, res, next) {
+exports.deleteExtraImage = async function deleteExtraImage(req, res, next) {
   try {
-    productRepository.removeImage(Number(req.params.imageId), Number(req.params.id));
+    await productRepository.removeImage(Number(req.params.imageId), Number(req.params.id));
     res.json({ message: 'Imagem removida' });
   } catch (err) {
     next(err);

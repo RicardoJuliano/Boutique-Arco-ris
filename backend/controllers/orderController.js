@@ -1,4 +1,4 @@
-﻿const orderService    = require('../services/orderService');
+const orderService    = require('../services/orderService');
 const orderRepository = require('../repositories/orderRepository');
 const { sendOrderEmail } = require('../utils/mailer');
 
@@ -22,22 +22,21 @@ exports.create = async function create(req, res, next) {
   }
 };
 
-exports.list = function list(req, res, next) {
+exports.list = async function list(req, res, next) {
   try {
-    const orders = orderRepository.findByUser(req.user.id);
+    const orders = await orderRepository.findByUser(req.user.id);
     res.json({ orders });
   } catch (err) {
     next(err);
   }
 };
 
-exports.getById = function getById(req, res, next) {
+exports.getById = async function getById(req, res, next) {
   try {
-    const order = orderRepository.findById(Number(req.params.id), req.user.id);
+    const order = await orderRepository.findById(Number(req.params.id), req.user.id);
     if (!order) return res.status(404).json({ error: 'Pedido não encontrado' });
     res.json({ order });
   } catch (err) {
     next(err);
   }
 };
-

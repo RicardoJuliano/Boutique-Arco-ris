@@ -10,18 +10,18 @@ module.exports = async function authMiddleware(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = userRepository.findById(payload.id);
+    const user = await userRepository.findById(payload.id);
 
     if (!user) {
       return res.status(401).json({ error: 'Usuário não encontrado' });
     }
 
     req.user = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      cpf: user.cpf ?? null,
-      isAdmin: user.is_admin === 1,
+      id:      user.id,
+      name:    user.name,
+      email:   user.email,
+      cpf:     user.cpf ?? null,
+      isAdmin: Boolean(user.is_admin),
     };
     next();
   } catch (err) {

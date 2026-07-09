@@ -1,15 +1,15 @@
-﻿const authService = require('../services/authService');
+const authService = require('../services/authService');
 const { setCsrfCookie, clearCsrfCookie } = require('../middlewares/csrfMiddleware');
 const { registerSchema, loginSchema } = require('../validators/authValidator');
 
 const isProd = process.env.NODE_ENV === 'production';
 
-// cross-origin em produÃ§Ã£o (Vercel â†’ Render) exige sameSite=none + secure
+// Em produção (Vercel) frontend e API ficam no mesmo domínio → sameSite=none funciona mas strict também funcionaria
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: isProd,
+  secure:   isProd,
   sameSite: isProd ? 'none' : 'strict',
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  maxAge:   7 * 24 * 60 * 60 * 1000,
 };
 
 exports.register = async function register(req, res, next) {
@@ -39,7 +39,7 @@ exports.login = async function login(req, res, next) {
 exports.logout = function logout(req, res) {
   res.clearCookie('token', {
     httpOnly: true,
-    secure: isProd,
+    secure:   isProd,
     sameSite: isProd ? 'none' : 'strict',
   });
   clearCsrfCookie(res);
@@ -50,5 +50,3 @@ exports.me = function me(req, res) {
   const csrfToken = setCsrfCookie(res);
   res.json({ user: req.user, csrfToken });
 };
-
-

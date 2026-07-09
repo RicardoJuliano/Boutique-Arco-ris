@@ -4,7 +4,6 @@ const recommendationRepository = require('../repositories/recommendationReposito
 
 const AI_TIMEOUT_MS = 10_000;
 
-// Mapeiam os rótulos exibidos no quiz para os identificadores normalizados do catálogo
 const STYLE_MAP = {
   'Clássico': 'clássico',
   'Moderno': 'moderno',
@@ -48,53 +47,55 @@ const aiResponseSchema = z.object({
   message: z.string().min(1).max(500),
   recommendations: z
     .array(z.object({
-      id: z.number().int().positive(),
+      id:     z.number().int().positive(),
       reason: z.string().min(1).max(300),
     }))
     .length(3),
 });
 
 exports.getRecommendations = async function getRecommendations({ userId, answers }) {
-  const activeCatalog = productRepository.findActive();
+  const activeCatalog = await productRepository.findActive();
 
   const filteredCatalog = filterCatalog(answers, activeCatalog);
-  // fallback para o catálogo completo caso o filtro retorne menos de 3 produtos
   const catalogForAI = filteredCatalog.length >= 3 ? filteredCatalog : activeCatalog;
 
   const aiResult = await callAnthropic(answers, catalogForAI);
 
-  const enrichedRecommendations = aiResult.recommendations.map((rec) => {
-    const product = activeCatalog.find((p) => p.id === rec.id) || productRepository.findById(rec.id);
-    return { ...rec, product: product || null };
-  });
+  const enrichedRecommendations = await Promise.all(
+    aiResult.recommendations.map(async (rec) => {
+      const product = activeCatalog.find((p) => p.id === rec.id)
+        || await productRepository.findById(rec.id);
+      return { ...rec, product: product || null };
+    })
+  );
 
   const finalResult = {
-    message: aiResult.message,
+    message:         aiResult.message,
     recommendations: enrichedRecommendations,
   };
 
   await recommendationRepository.save({
     userId,
     answers: JSON.stringify(answers),
-    result: JSON.stringify(finalResult),
+    result:  JSON.stringify(finalResult),
   });
 
   return finalResult;
 };
 
 function filterCatalog(answers, catalog) {
-  const style = STYLE_MAP[answers.style];
+  const style    = STYLE_MAP[answers.style];
   const occasion = OCCASION_MAP[answers.occasion];
-  const colors = answers.colors.map((c) => COLOR_MAP[c]);
+  const colors   = answers.colors.map((c) => COLOR_MAP[c]);
   const category = CATEGORY_MAP[answers.category];
   const maxBudget = BUDGET_MAX[answers.budget];
 
   return catalog.filter((p) => {
-    const matchStyle = p.style.includes(style);
+    const matchStyle    = p.style.includes(style);
     const matchOccasion = p.occasions.includes(occasion);
-    const matchColor = colors.some((c) => p.colors.includes(c));
-    const matchBudget = p.price <= maxBudget;
-    const matchSize = p.sizes.includes(answers.size);
+    const matchColor    = colors.some((c) => p.colors.includes(c));
+    const matchBudget   = p.price <= maxBudget;
+    const matchSize     = p.sizes.includes(answers.size);
     const matchCategory = category === null || p.category === category;
     return matchStyle && matchOccasion && matchColor && matchBudget && matchSize && matchCategory;
   });
@@ -185,7 +186,6 @@ async function callAnthropic(answers, catalog) {
     throw new Error('Resposta da IA não corresponde ao formato esperado');
   }
 
-  // garante que a IA não fabricou IDs fora do catálogo enviado
   const validIds = catalog.map((p) => p.id);
   const invalidIds = validated.data.recommendations.filter((r) => !validIds.includes(r.id));
   if (invalidIds.length > 0) throw new Error('A IA retornou IDs de produtos inexistentes no catálogo');

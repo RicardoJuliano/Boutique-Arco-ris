@@ -5,19 +5,18 @@ const userRepository = require('../repositories/userRepository');
 const SALT_ROUNDS = 12;
 const JWT_EXPIRES_IN = '7d';
 
-// Hash fixo usado quando o usuário não existe — garante tempo de resposta constante
-// e evita timing attack que revelaria quais emails estão cadastrados
+// Hash fixo para garantir tempo de resposta constante e evitar timing attack
 const DUMMY_HASH = '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/sDMqbAm';
 
 exports.register = async function register({ name, email, cpf, password }) {
-  const existingEmail = userRepository.findByEmail(email);
+  const existingEmail = await userRepository.findByEmail(email);
   if (existingEmail) {
     const err = new Error('Não foi possível criar a conta com esses dados');
     err.status = 409;
     throw err;
   }
 
-  const existingCPF = userRepository.findByCPF(cpf);
+  const existingCPF = await userRepository.findByCPF(cpf);
   if (existingCPF) {
     const err = new Error('CPF já cadastrado');
     err.status = 409;
@@ -25,15 +24,14 @@ exports.register = async function register({ name, email, cpf, password }) {
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  // isAdmin sempre 0 no cadastro — promoção deve ser feita diretamente no banco
-  const user = userRepository.create({ name, email, cpf, passwordHash, isAdmin: 0 });
+  const user = await userRepository.create({ name, email, cpf, passwordHash, isAdmin: false });
   const token = generateToken(user);
 
   return { user: { ...user, isAdmin: false }, token };
 };
 
 exports.login = async function login({ email, password }) {
-  const found = userRepository.findByEmail(email);
+  const found = await userRepository.findByEmail(email);
   const hashToCompare = found ? found.password_hash : DUMMY_HASH;
   const match = await bcrypt.compare(password, hashToCompare);
 
@@ -44,11 +42,11 @@ exports.login = async function login({ email, password }) {
   }
 
   const user = {
-    id: found.id,
-    name: found.name,
-    email: found.email,
-    cpf: found.cpf ?? null,
-    isAdmin: found.is_admin === 1,
+    id:      found.id,
+    name:    found.name,
+    email:   found.email,
+    cpf:     found.cpf ?? null,
+    isAdmin: Boolean(found.is_admin),
   };
   const token = generateToken(user);
 

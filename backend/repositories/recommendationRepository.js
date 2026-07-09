@@ -1,20 +1,18 @@
-const db = require('../config/database');
+const pool = require('../config/database');
 
-exports.save = function save({ userId, answers, result }) {
-  const stmt = db.prepare(
-    'INSERT INTO recommendations (user_id, answers, result) VALUES (?, ?, ?)'
+exports.save = async function save({ userId, answers, result }) {
+  const { rows } = await pool.query(
+    'INSERT INTO recommendations (user_id, answers, result) VALUES ($1, $2, $3) RETURNING id',
+    [userId, answers, result]
   );
-  const res = stmt.run(userId, answers, result);
-  return Number(res.lastInsertRowid);
+  return rows[0].id;
 };
 
-exports.findByUser = function findByUser(userId) {
-  const rows = db
-    .prepare(
-      'SELECT id, answers, result, created_at FROM recommendations WHERE user_id = ? ORDER BY created_at DESC'
-    )
-    .all(userId);
-
+exports.findByUser = async function findByUser(userId) {
+  const { rows } = await pool.query(
+    'SELECT id, answers, result, created_at FROM recommendations WHERE user_id = $1 ORDER BY created_at DESC',
+    [userId]
+  );
   return rows.map((row) => ({
     id:         row.id,
     answers:    JSON.parse(row.answers),

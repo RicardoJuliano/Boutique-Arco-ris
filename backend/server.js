@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const requiredEnvVars = ['JWT_SECRET', 'ANTHROPIC_API_KEY', 'FRONTEND_URL'];
+const requiredEnvVars = ['JWT_SECRET', 'ANTHROPIC_API_KEY', 'FRONTEND_URL', 'DATABASE_URL'];
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.error(`[FATAL] Variável de ambiente obrigatória não definida: ${envVar}`);
@@ -27,7 +27,6 @@ const PORT = process.env.PORT || 3001;
 
 app.use(helmet({ contentSecurityPolicy: true }));
 
-// credentials: true é obrigatório para que o browser envie cookies cross-origin
 app.use(cors({
   origin(origin, callback) {
     if (!origin || isAllowedOrigin(origin)) {
@@ -39,8 +38,6 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-
-// limit reduz superfície de ataque contra payloads gigantes
 app.use(express.json({ limit: '10kb' }));
 
 app.use('/api/auth', authRoutes);
@@ -58,12 +55,21 @@ app.use((_req, res) => {
   res.status(404).json({ error: 'Rota não encontrada' });
 });
 
-// error middleware DEVE ser o último — Express exige 4 parâmetros para identificar handlers de erro
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`[server] Boutique Arco-Íris API rodando em http://localhost:${PORT}`);
-  console.log(`[server] Ambiente: ${process.env.NODE_ENV || 'development'}`);
-});
+// Bootstrap: garante que ADMIN_EMAIL sempre tenha is_admin=true
+if (process.env.ADMIN_EMAIL) {
+  const pool = require('./config/database');
+  pool.query('UPDATE users SET is_admin = true WHERE email = $1 AND is_admin = false', [process.env.ADMIN_EMAIL])
+    .catch((err) => console.warn('[server] Admin bootstrap skipped:', err.message));
+}
+
+// Só escuta quando executado diretamente (não em ambiente serverless)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`[server] Boutique Arco-Íris API rodando em http://localhost:${PORT}`);
+    console.log(`[server] Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
 
 module.exports = app;

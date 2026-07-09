@@ -15,9 +15,9 @@ exports.create = async function create(req, res, next) {
   }
 };
 
-exports.history = function history(req, res, next) {
+exports.history = async function history(req, res, next) {
   try {
-    const records = recommendationRepository.findByUser(req.user.id);
+    const records = await recommendationRepository.findByUser(req.user.id);
     res.json({ history: records });
   } catch (err) {
     next(err);
