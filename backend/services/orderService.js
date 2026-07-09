@@ -46,13 +46,13 @@ exports.createOrder = async function createOrder(userId, body) {
       ).get(item.productId);
 
       if (!product || !product.active) {
-        throw Object.assign(new Error(`Produto ${item.productId} nÃ£o encontrado`), { status: 422 });
+        throw Object.assign(new Error(`Produto ${item.productId} não encontrado`), { status: 422 });
       }
       if (product.stock < item.quantity) {
         throw Object.assign(new Error(`Estoque insuficiente para "${product.name}"`), { status: 422 });
       }
 
-      // guard de concorrÃªncia: sÃ³ decrementa se o estoque ainda for suficiente no momento do UPDATE
+      // guard de concorrência: só decrementa se o estoque ainda for suficiente no momento do UPDATE
       const { changes } = db.prepare(
         'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?'
       ).run(item.quantity, product.id, item.quantity);
