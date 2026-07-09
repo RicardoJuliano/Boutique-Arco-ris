@@ -182,7 +182,7 @@ export default function CheckoutPage() {
                       </div>
                     )}
                     {freightOptions && !cepLoading && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gold text-sm">âœ“</div>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gold text-sm">âœ"</div>
                     )}
                   </div>
                   {cepError && (
@@ -272,22 +272,22 @@ export default function CheckoutPage() {
 
             {/* ── ETAPA 1: PAGAMENTO ── */}
             {step === 1 && (
-              <div className=”border border-border bg-surface p-6 space-y-4”>
-                <h2 className=”font-display text-xl font-light text-cream mb-4”>Método de Pagamento</h2>
+              <div className="border border-border bg-surface p-6 space-y-4">
+                <h2 className="font-display text-xl font-light text-cream mb-4">Método de Pagamento</h2>
 
-                <label className=”flex items-start gap-3 p-4 border border-gold bg-gold/5 cursor-default”>
-                  <input type=”radio” name=”payment” checked readOnly className=”accent-gold mt-1” />
+                <label className="flex items-start gap-3 p-4 border border-gold bg-gold/5 cursor-default">
+                  <input type="radio" name="payment" checked readOnly className="accent-gold mt-1" />
                   <div>
-                    <p className=”font-body text-sm font-light text-cream”>Pix</p>
-                    <p className=”font-body text-xs font-light text-muted”>Pagamento instantâneo com QR Code</p>
+                    <p className="font-body text-sm font-light text-cream">Pix</p>
+                    <p className="font-body text-xs font-light text-muted">Pagamento instantâneo com QR Code</p>
                   </div>
                 </label>
 
-                <div className=”border border-border bg-surface2 p-6 text-center”>
-                  <div className=”w-28 h-28 bg-border/60 mx-auto mb-3 flex items-center justify-center”>
-                    <span className=”font-body text-xs text-muted”>QR Code</span>
+                <div className="border border-border bg-surface2 p-6 text-center">
+                  <div className="w-28 h-28 bg-border/60 mx-auto mb-3 flex items-center justify-center">
+                    <span className="font-body text-xs text-muted">QR Code</span>
                   </div>
-                  <p className=”font-body text-xs font-light text-muted”>
+                  <p className="font-body text-xs font-light text-muted">
                     O QR Code Pix será gerado ao confirmar o pedido.
                   </p>
                 </div>
@@ -300,8 +300,8 @@ export default function CheckoutPage() {
 
             {/* ── ETAPA 2: REVISÃO ── */}
             {step === 2 && (
-              <div className=”border border-border bg-surface p-6 space-y-5”>
-                <h2 className=”font-display text-xl font-light text-cream”>Revisão do Pedido</h2>
+              <div className="border border-border bg-surface p-6 space-y-5">
+                <h2 className="font-display text-xl font-light text-cream">Revisão do Pedido</h2>
 
                 <div className="divide-y divide-border">
                   {items.map(({ product, size, quantity }) => (
