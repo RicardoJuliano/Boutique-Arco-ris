@@ -4,7 +4,8 @@ const requiredEnvVars = ['JWT_SECRET', 'ANTHROPIC_API_KEY', 'FRONTEND_URL', 'DAT
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.error(`[FATAL] Variável de ambiente obrigatória não definida: ${envVar}`);
-    process.exit(1);
+    // process.exit apenas quando rodando diretamente; em serverless lança erro de rota
+    if (require.main === module) process.exit(1);
   }
 }
 
