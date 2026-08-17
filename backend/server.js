@@ -33,6 +33,7 @@ app.use(cors({
     if (!origin || isAllowedOrigin(origin)) {
       return callback(null, true);
     }
+    console.error('[cors-debug] origin recebida=%j FRONTEND_URL=%j NODE_ENV=%j', origin, process.env.FRONTEND_URL, process.env.NODE_ENV);
     return callback(new Error('Origin not allowed by CORS'));
   },
   credentials: true,
