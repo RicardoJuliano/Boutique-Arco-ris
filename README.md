@@ -1,51 +1,90 @@
-# Boutique Arco-Íris
+# Boutique Arco-Iris
 
-E-commerce de moda com consultora de estilo por IA. Comecei esse projeto para ter uma loja real para a Boutique Arco-Íris, uma loja física de roupas, e acabou virando meu projeto de portfólio principal.
+E-commerce full stack para uma boutique de moda, com vitrine para o cliente e uma area administrativa para gerenciar catalogo, produtos e pedidos.
 
-A parte mais interessante é a consultora de estilo: o usuário responde um quiz de 6 perguntas sobre seu estilo e a API da Anthropic devolve 3 recomendações personalizadas com justificativa para cada uma.
+Este projeto foi construido como uma loja realista, nao apenas como uma landing page. A aplicacao junta frontend, API, autenticacao, checkout, upload de imagens, painel admin e persistencia em banco, deixando o fluxo mais proximo do que uma loja precisaria para sair do prototipo.
+
+## O que a aplicacao faz
+
+- Vitrine com pagina inicial, catalogo, detalhe de produto e navegacao por categorias.
+- Carrinho, checkout, confirmacao de pedido e historico para usuario logado.
+- Cadastro, login e rotas protegidas no frontend.
+- Painel administrativo para criar, editar e remover produtos.
+- Upload de imagens com Cloudinary.
+- Scanner de codigo de barras no fluxo de produto.
+- API REST separada em rotas, controllers, services e repositories.
+- Autenticacao com JWT, senhas com hash e middleware para perfil admin.
+- Validacao de dados com Zod.
+- Middlewares para CORS, rate limit, CSRF, erros e seguranca HTTP.
+- Recomendacao/consultora de moda por IA.
+- Calculo de frete e envio de e-mails pelo backend.
 
 ## Stack
 
-**Frontend:** React 18, TypeScript (strict mode), Tailwind CSS, Vite
+Frontend:
 
-**Backend:** Node.js, Express, SQLite, Knex, JWT via cookie HttpOnly, Zod, Cloudinary, Anthropic API, ZXing
+- React
+- TypeScript
+- Vite
+- React Router
+- Tailwind CSS
+- ZXing para leitura de codigo de barras
 
-## O que tem no projeto
+Backend:
 
-- Catálogo com busca por nome/descrição e filtros por categoria
-- Consultora de estilo com IA e histórico de consultorias anteriores
-- Carrinho persistente entre páginas
-- Checkout com cálculo de frete PAC/SEDEX e pagamento por cartão ou PIX
-- Login com CPF validado e sessão segura
-- Painel admin com leitor de código de barras via câmera, upload de imagens no Cloudinary e controle de estoque
+- Node.js
+- Express
+- PostgreSQL
+- JWT
+- bcryptjs
+- Cloudinary
+- Multer
+- Nodemailer
+- Helmet, CORS e express-rate-limit
+- Zod
 
-O backend segue arquitetura Controller/Service/Repository. Passei por uma sessão grande de refatoração (48 arquivos) depois que o projeto cresceu demais sem estrutura, e também corrigi 8 bugs de produção com diagnóstico de causa raiz — a maioria vinha de inconsistência de nomenclatura entre frontend e backend.
+## Estrutura do projeto
 
-## Como rodar
+```txt
+.
+├── frontend/        # SPA em React + TypeScript
+├── backend/         # API REST em Node.js + Express
+├── api/             # entrada para deploy/serverless
+├── vercel.json      # configuracao de deploy
+└── package.json     # script de build do frontend
+```
+
+## Rodando localmente
+
+Clone o repositorio e instale as dependencias de cada parte:
 
 ```bash
 git clone https://github.com/RicardoJuliano/Boutique-Arco-ris.git
+cd Boutique-Arco-ris
 
-# backend
-cd server && npm install
-cp .env.example .env
-npm run dev
-
-# frontend
-cd client && npm install
+cd backend
+npm install
 npm run dev
 ```
 
-Variáveis necessárias no `.env`:
-```
-ANTHROPIC_API_KEY=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-JWT_SECRET=
-ADMIN_EMAIL=
+Em outro terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
----
+Antes de subir o backend, crie o `.env` com as credenciais usadas pela API: banco PostgreSQL, segredo JWT, Cloudinary, configuracao de e-mail e servico de IA.
 
-Ricardo Juliano — [LinkedIn](https://linkedin.com/in/ricardo-juliano)
+## Banco de dados
+
+O backend usa PostgreSQL. O script inicial fica em:
+
+```txt
+backend/scripts/setup-db.sql
+```
+
+## Observacoes
+
+O foco do projeto e mostrar uma aplicacao completa de loja: interface de compra, area logada, administracao e backend organizado. Algumas integracoes dependem de variaveis de ambiente externas, entao o projeto precisa dessas credenciais para funcionar 100% fora do ambiente original.
