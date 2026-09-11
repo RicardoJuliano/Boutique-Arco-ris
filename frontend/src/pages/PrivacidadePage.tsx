@@ -19,9 +19,9 @@ export default function PrivacidadePage() {
           <section>
             <h2 className="font-display text-lg font-light text-cream mb-4">1. Quem somos</h2>
             <p>
-              A <strong className="text-cream font-normal">Boutique Arco-Íris</strong>, localizada na Av. JK, 502 — Buenópolis/MG,
+              A <strong className="text-cream font-normal">Boutique Arco-Íris</strong>, localizada na Av. JK, 502, Buenópolis/MG,
               CEP 39230-000, é responsável pelo tratamento dos dados pessoais coletados neste site,
-              nos termos da Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).
+              nos termos da Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018).
             </p>
           </section>
 
@@ -63,14 +63,14 @@ export default function PrivacidadePage() {
             <h2 className="font-display text-lg font-light text-cream mb-4">4. Com quem compartilhamos</h2>
             <ul className="space-y-2">
               <li>
-                <strong className="text-cream font-normal">Cloudinary</strong> — serviço de hospedagem de imagens dos produtos
+                <strong className="text-cream font-normal">Cloudinary</strong>: serviço de hospedagem de imagens dos produtos
                 (não recebe dados pessoais dos clientes).
               </li>
               <li>
-                <strong className="text-cream font-normal">Correios</strong> — endereço de entrega para despacho das encomendas.
+                <strong className="text-cream font-normal">Correios</strong>: endereço de entrega para despacho das encomendas.
               </li>
               <li>
-                <strong className="text-cream font-normal">Autoridades públicas</strong> — quando exigido por lei, ordem judicial ou órgão regulatório.
+                <strong className="text-cream font-normal">Autoridades públicas</strong>: quando exigido por lei, ordem judicial ou órgão regulatório.
               </li>
             </ul>
           </section>

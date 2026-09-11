@@ -20,7 +20,7 @@ export default function TrocasPage() {
 
           <section className="border border-gold/30 bg-gold/5 p-6">
             <h2 className="font-display text-lg font-light text-cream mb-3">
-              Direito de Arrependimento — 7 dias
+              Direito de Arrependimento (7 dias)
             </h2>
             <p>
               Conforme o <strong className="text-cream font-normal">Art. 49 do CDC</strong>, você tem até{' '}
@@ -62,11 +62,11 @@ export default function TrocasPage() {
                 <p>Até <strong className="text-cream font-normal">7 dias corridos</strong> após o recebimento. CDC, Art. 49.</p>
               </div>
               <div className="border-l-2 border-gold/40 pl-4">
-                <h3 className="text-cream font-normal mb-1">Defeito — produtos não duráveis (roupas, acessórios)</h3>
+                <h3 className="text-cream font-normal mb-1">Defeito em produtos não duráveis (roupas, acessórios)</h3>
                 <p>Até <strong className="text-cream font-normal">30 dias</strong> após o recebimento. CDC, Art. 26, I.</p>
               </div>
               <div className="border-l-2 border-gold/40 pl-4">
-                <h3 className="text-cream font-normal mb-1">Defeito — produtos duráveis</h3>
+                <h3 className="text-cream font-normal mb-1">Defeito em produtos duráveis</h3>
                 <p>Até <strong className="text-cream font-normal">90 dias</strong> após o recebimento. CDC, Art. 26, II.</p>
               </div>
             </div>

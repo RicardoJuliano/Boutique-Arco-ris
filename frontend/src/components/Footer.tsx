@@ -59,7 +59,7 @@ export default function Footer() {
               className={`flex items-center gap-2 ${footerLink}`}
             >
               <IconWhatsApp />
-              <span>Viviane — (38) 99922-3190</span>
+              <span>Viviane · (38) 99922-3190</span>
             </a>
             <a
               href={INSTAGRAM_URL}
@@ -74,7 +74,7 @@ export default function Footer() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0 mt-0.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
               </svg>
-              <span>Av. JK, 502 — Buenópolis, MG · CEP 39230-000</span>
+              <span>Av. JK, 502, Buenópolis, MG · CEP 39230-000</span>
             </div>
           </div>
 

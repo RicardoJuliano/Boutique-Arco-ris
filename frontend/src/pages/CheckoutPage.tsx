@@ -229,7 +229,7 @@ export default function CheckoutPage() {
                 {freightOptions && (
                   <div className="border-t border-border pt-5">
                     <h3 className="font-body text-xs tracking-widest uppercase text-muted mb-4">
-                      Opções de Entrega — Preços Correios 2025
+                      Opções de Entrega (Preços Correios 2025)
                     </h3>
                     <div className="space-y-2">
                       {Object.entries(freightOptions).map(([key, opt]) => (
@@ -327,7 +327,7 @@ export default function CheckoutPage() {
                     {address.street}{address.complement ? `, ${address.complement}` : ''}
                   </p>
                   <p className="font-body text-sm font-light text-muted">
-                    {address.district && `${address.district} · `}{address.city} — {address.state} · CEP {cep}
+                    {address.district && `${address.district} · `}{address.city}, {address.state} · CEP {cep}
                   </p>
                   <p className="font-body text-sm font-light text-muted">{shipping?.label}</p>
                 </div>

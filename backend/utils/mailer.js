@@ -23,7 +23,7 @@ exports.sendOrderEmail = async function sendOrderEmail(order, user) {
   await transporter.sendMail({
     from: `"Boutique Arco-Íris" <${process.env.GMAIL_USER}>`,
     to,
-    subject: `🛍️ Novo Pedido #${order.orderId} — ${user.name}`,
+    subject: `🛍️ Novo Pedido #${order.orderId} de ${user.name}`,
     html: buildHTML(order, user),
   });
   console.log(`[email] Pedido #${order.orderId} enviado para ${to}`);
@@ -172,7 +172,7 @@ function buildHTML(order, user) {
       <div style="background:#faf8f5;border:1px solid #e5ddd5;padding:16px;margin-bottom:24px;font-size:14px;color:#2c2420;line-height:1.7">
         <strong>${addr.name}</strong><br>
         ${addr.street}${addr.complement ? ', ' + addr.complement : ''}<br>
-        ${addr.district ? addr.district + ' — ' : ''}${addr.city}/${addr.state}<br>
+        ${addr.district ? addr.district + ', ' : ''}${addr.city}/${addr.state}<br>
         CEP: ${addr.zip}
       </div>
 
@@ -203,7 +203,7 @@ function buildHTML(order, user) {
     <!-- Rodapé -->
     <div style="background:#f0ebe3;padding:20px 32px;text-align:center;border-top:1px solid #e5ddd5">
       <p style="margin:0;font-size:12px;color:#8b7355">
-        Boutique Arco-Íris — Sistema de Pedidos
+        Boutique Arco-Íris · Sistema de Pedidos
       </p>
     </div>
 
@@ -215,6 +215,6 @@ function buildHTML(order, user) {
 }
 
 function formatCPF(cpf) {
-  if (!cpf || cpf.length !== 11) return cpf || '—';
+  if (!cpf || cpf.length !== 11) return cpf || 'não informado';
   return `${cpf.slice(0, 3)}.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-${cpf.slice(9)}`;
 }

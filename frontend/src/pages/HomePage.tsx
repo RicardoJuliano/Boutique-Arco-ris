@@ -106,7 +106,7 @@ export default function HomePage() {
 
           <div className="relative h-full flex flex-col justify-center">
             <div ref={contentRef} className="max-w-6xl mx-auto px-6 w-full pt-20 md:pt-24">
-              <p className="hero-line hero-line-1 hero-eyebrow">Loja Multimarcas — Buenópolis, MG</p>
+              <p className="hero-line hero-line-1 hero-eyebrow">Loja Multimarcas · Buenópolis, MG</p>
               <h1 className="hero-line hero-line-2 font-display text-5xl md:text-7xl font-light text-cream leading-tight mb-4 max-w-xl">
                 A luz mais brilhante
                 <br />
@@ -206,12 +206,12 @@ export default function HomePage() {
           </h2>
           <p className="font-body text-sm font-light text-muted max-w-lg mx-auto mb-10 leading-relaxed">
             Combinamos inteligência artificial com curadoria de moda para entregar recomendações
-            verdadeiramente personalizadas — sem julgamentos, sem confusão.
+            verdadeiramente personalizadas, sem julgamentos, sem confusão.
           </p>
           {isAuthenticated ? (
             <Link to="/quiz" className="btn-gold-hero">Iniciar Consultoria</Link>
           ) : (
-            <Link to="/register" className="btn-gold-hero">Começar Agora — É Grátis</Link>
+            <Link to="/register" className="btn-gold-hero">Começar Agora · É Grátis</Link>
           )}
         </div>
       </section>

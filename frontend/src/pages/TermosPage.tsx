@@ -22,7 +22,7 @@ export default function TermosPage() {
               Ao acessar e utilizar o site da <strong className="text-cream font-normal">Boutique Arco-Íris</strong>,
               você concorda com estes Termos de Uso. Se não concordar com qualquer disposição,
               pedimos que não utilize nosso site. Estes termos estão em conformidade com o
-              Código de Defesa do Consumidor (CDC — Lei nº 8.078/1990) e o Marco Civil da
+              Código de Defesa do Consumidor (CDC, Lei nº 8.078/1990) e o Marco Civil da
               Internet (Lei nº 12.965/2014).
             </p>
           </section>
@@ -98,8 +98,8 @@ export default function TermosPage() {
           <section>
             <h2 className="font-display text-lg font-light text-cream mb-4">6. Propriedade Intelectual</h2>
             <p>
-              Todo o conteúdo deste site — incluindo textos, imagens, logotipo, nome "Boutique Arco-Íris"
-              e o sistema de recomendações com IA — é de propriedade exclusiva da Boutique Arco-Íris
+              Todo o conteúdo deste site (incluindo textos, imagens, logotipo, nome "Boutique Arco-Íris"
+              e o sistema de recomendações com IA) é de propriedade exclusiva da Boutique Arco-Íris
               ou de seus licenciantes. É vedada a reprodução, distribuição ou uso comercial sem
               autorização prévia por escrito.
             </p>

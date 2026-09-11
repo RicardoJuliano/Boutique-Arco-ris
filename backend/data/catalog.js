@@ -86,7 +86,7 @@ const CATALOG = [
     colors: ['neutros'],
     occasions: ['festa', 'passeio'],
     sizes: ['P', 'M', 'G'],
-    desc: 'Vestido slip em cetim — clássico renovado para noites especiais.',
+    desc: 'Vestido slip em cetim, clássico renovado para noites especiais.',
     tag: 'Exclusivo',
     image_url: 'https://images.pexels.com/photos/36041595/pexels-photo-36041595.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop',
   },
